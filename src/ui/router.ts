@@ -1,6 +1,6 @@
 /**
  * Tiny hash router. Hash routing keeps the static site working from any
- * subpath (GitHub Pages serves it under /usage-dashboard-trial/) with no
+ * subpath (GitHub Pages serves it under /poc-usage-dashboard/) with no
  * server rewrites. Format: `#/<view>[/<param>]?<filter query>`.
  */
 import { isSource, type Source } from '../schema/usage';

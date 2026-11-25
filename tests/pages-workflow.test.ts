@@ -32,7 +32,7 @@ describe('GitHub Pages workflow', () => {
     expect(pages).toMatch(/uses:\s*actions\/configure-pages@v\d+/);
     expect(pages).toMatch(/uses:\s*actions\/upload-pages-artifact@v\d+/);
     expect(pages).toMatch(/uses:\s*actions\/deploy-pages@v\d+/);
-    expect(pages).toContain('VITE_BASE: /usage-dashboard-trial/');
+    expect(pages).toContain('VITE_BASE: /poc-usage-dashboard/');
     expect(pages).toMatch(/path:\s*dist/);
   });
 

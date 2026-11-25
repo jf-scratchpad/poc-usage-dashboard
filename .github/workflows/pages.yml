@@ -33,7 +33,7 @@ jobs:
       - name: Build with the GitHub Pages base path
         run: npm run build
         env:
-          VITE_BASE: /usage-dashboard-trial/
+          VITE_BASE: /poc-usage-dashboard/
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
