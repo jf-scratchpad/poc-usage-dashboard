@@ -27,3 +27,23 @@ API: `loadBudgetConfig()`, `parseBudgetConfig(raw)`, `evaluateBudgets(records, c
 `evaluateBudget(...)`, `budgetSummary(statuses)`, `periodBounds(period, asOf)`, `alertLevel(pct, thresholds)`.
 
 **Real data:** a real budget would be edited in `config/budgets.json` (no secrets involved). Nothing here reads a billing system.
+
+## Forecasting — `src/forecast.ts`
+
+Input is weekly total spend (ISO weeks, from `totalsByWeek`). A trailing
+partial week is dropped so it doesn't drag the trend down. Two models:
+
+- **`linear`** (default): ordinary least squares `y = a + b·x` over week index
+  `x = 0..n−1`. The forecast for future week `x` is `a + b·x`. Band is the
+  textbook prediction interval `± z · s · √(1 + 1/n + (x − x̄)² / Sxx)`, with
+  `s = √(SSE / (n − 2))`. `slope` is the change in spend per week.
+- **`ewma`**: simple exponential smoothing, `L₀ = y₀`, `Lₜ = α·yₜ + (1 − α)·Lₜ₋₁`
+  (default `α = 0.5`). The forecast is flat at the last level; the band is
+  `± z · s · √(1 + (h − 1)·α²)` with `s` the RMS one-step-ahead error.
+
+`z` defaults to 1.96 (≈ 95% if residuals were normal; treat it as a rough
+range, not a guarantee). Values and lower bounds are clamped at 0.
+
+API: `forecastWeekly(records, { method, horizon = 4, alpha, z, source })` →
+`{ history: {weekStart, value}[], forecast: {weekStart, value, low, high}[], slope?, residualStdev }`;
+`forecastBySource(records, opts)`; lower-level `forecastSeries(values, opts)`, `linearRegression`, `ewma`.
