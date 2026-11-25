@@ -72,3 +72,4 @@ flowchart LR
 - **Engines** (pure, documented in [analytics.md](analytics.md)): `src/budgets.ts` + `config/budgets.json` (burn, % used, run-rate projection, ok/warn/over).
 - `src/forecast.ts`: next 4 weeks of spend per source or total, linear (OLS + prediction interval) or EWMA, with a low/high band.
 - `src/anomaly.ts`: rolling z-score spike detection per total, source, or source × assistant.
+- `src/allocation.ts`: per-assistant cost across sources, cost per unit, and one assistant's weekly drill-down.
