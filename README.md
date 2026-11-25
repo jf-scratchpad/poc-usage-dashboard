@@ -2,7 +2,7 @@
 
 A static web dashboard of AI usage and spend **per assistant** and **per week**, with trend lines, across three sources: **Grok Bot**, **Cursor**, and **Azure Cost Management**.
 
-> **Sample data only.** No real accounts, credentials, tokens, or runtime network calls. Nothing is deployed. This is a one-day trial repo (CD-4, Wed Nov 25, 2026), and nothing else depends on it.
+> **Sample data only.** No real accounts, credentials, tokens, or runtime network calls. This is a one-day trial repo (CD-4, Wed Nov 25, 2026) and its v2 follow-on, and nothing else depends on it. The static site is published to GitHub Pages at [https://jf-scratchpad.github.io/usage-dashboard-trial/](https://jf-scratchpad.github.io/usage-dashboard-trial/) once Pages is enabled for this repo.
 
 ## What you get
 
@@ -24,6 +24,13 @@ npm run preview   # serve dist/ locally to check the build
 ```
 
 Open `dist/index.html` through `npm run preview` (browsers block ES modules from `file://`).
+
+## Viewing the site
+
+- **GitHub Pages** (no local install): [https://jf-scratchpad.github.io/usage-dashboard-trial/](https://jf-scratchpad.github.io/usage-dashboard-trial/). All numbers are fictional sample data. The published site is reachable by anyone with the link.
+- **Locally:** `npm ci`, `npm run build`, then `npm run preview`. Opening `dist/index.html` as a file does not work (browsers block ES modules from `file://`).
+
+The Pages workflow (`.github/workflows/pages.yml`) builds with `VITE_BASE=/usage-dashboard-trial/` and deploys on every push to `main`. Enable Pages once under Settings → Pages → Source: GitHub Actions if it is not on yet.
 
 ## Scripts
 
