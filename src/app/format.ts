@@ -1,17 +1,12 @@
 import type { Source } from '../schema/usage';
 import { isoWeekEnd, parseDate } from '../aggregate';
+import { sourceColors, sourceLabels } from '../adapters/registry';
 
-export const SOURCE_LABELS: Record<Source, string> = {
-  'grok-bot': 'Grok Bot',
-  cursor: 'Cursor',
-  azure: 'Azure',
-};
+// Labels and colors come from the adapter registry so a new source shows up
+// in every chart and filter without editing the UI.
+export const SOURCE_LABELS: Record<Source, string> = sourceLabels();
 
-export const SOURCE_COLORS: Record<Source, string> = {
-  'grok-bot': '#3ecfb2',
-  cursor: '#b388ff',
-  azure: '#5b9fd4',
-};
+export const SOURCE_COLORS: Record<Source, string> = sourceColors();
 
 export const TOTAL_COLOR = '#e6c36a';
 

@@ -5,7 +5,12 @@
  * Costs are always normalised to US dollars.
  */
 
-export const SOURCES = ['grok-bot', 'cursor', 'azure'] as const;
+/**
+ * Every known source id. Adding a source: append it here, then follow
+ * "Adding a source" in docs/adapters.md (the registry's metadata table is
+ * typed `Record<Source, …>`, so typecheck fails until it is described).
+ */
+export const SOURCES = ['grok-bot', 'cursor', 'azure', 'llm-api'] as const;
 export type Source = (typeof SOURCES)[number];
 
 export type UsageRecord = {

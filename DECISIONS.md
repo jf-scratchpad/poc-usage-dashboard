@@ -58,3 +58,8 @@ Every notable choice and why. Newest additions go at the bottom of their section
 - **Repo identity: Jose's own GitHub App `cody-grok-scratchpad`, not Cursor cloud agents.** The Cursor GitHub App isn't installed on the `jf-scratchpad` org, and Jose chose to use his own app for this trial. Work runs as three parallel local executors (collectors, web app, quality) on the box with short-lived installation tokens; the key never enters the repo.
 - **Initial scaffold pushed straight to `main`.** The repo was empty, so a base commit was needed before any branch or PR could exist. Everything after that goes through `grok/*` branches and PRs.
 - **Self-merge after green CI, merge commits only, no force pushes.** Jose's approved exception for this repo, today only, until 6 PM ET (work stops at 5:50 PM ET).
+
+## v2 data platform (track A)
+
+- **Adapter registry with a typed metadata table (`Record<Source, SourceMeta>` + `satisfies`).** Adding a source to `SOURCES` makes typecheck fail until it has a label, unit, and color, so the UI can't silently miss it. UI label/color maps are derived from the registry.
+- **4th source is `llm-api`, a vendor-neutral "direct model API" source, not a named provider.** Proves the plugin path while staying vendor agnostic; sample is fictional (`model-large-sample`, `model-small-sample`). Units are input + output tokens.

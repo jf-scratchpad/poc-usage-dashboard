@@ -74,3 +74,45 @@ concatenates their records. Every record has already passed `validateRecord`.
 | `tests/adapters/cursor.test.ts` | Sample parse, day×project roll-up, totals vs. the raw file, bad rows |
 | `tests/adapters/azure.test.ts` | Sample parse, project-tag roll-up, totals vs. the raw file, non-USD, bad rows, `yyyyMMdd` dates |
 | `tests/adapters/load-all.test.ts` | `loadAllUsage()` combines all three sources and matches per-adapter totals |
+
+## LLM API (v2, 4th source) — `src/adapters/llm-api.ts`
+
+- **Sample:** `data/sample/llm-api-usage.csv`, an invented, vendor-neutral
+  direct model-API usage export. Each row is one day × assistant × model with
+  `input_tokens`, `output_tokens`, and `cost_usd`. Includes an invented
+  late-October `batch-evals` spike and a mid-November Cody spike.
+- **Mapping:** rows roll up to one `UsageRecord` per day × `assistant`;
+  `units` = input + output tokens (`unit_type` is `tokens`); `cost_usd` summed.
+- **Parse API:** `parseLlmApiUsage(csvText)`.
+- **REAL DATA PLUGS IN HERE:** replace the `?raw` import with a model
+  provider's usage/billing export written out in this CSV shape. No
+  credentials or network calls in this repo.
+
+## Registry — `src/adapters/registry.ts`
+
+The registry is the single list of sources. It holds per-source metadata
+(`displayName`, `unitType`, `color`, `description`) and the adapter that
+loads each source. `loadAllUsage()` runs every registered adapter, and the UI's
+`SOURCE_LABELS` / `SOURCE_COLORS` (in `src/app/format.ts`) are derived from it,
+so a new source appears in charts and the source filter automatically.
+
+API: `getSourceMeta(id)`, `listSourceMeta()`, `sourceLabel(id)`,
+`sourceColor(id)`, `registerAdapter(adapter, { replace? })`,
+`unregisterAdapter(id)`, `getAdapters()`, `resetRegistry()`, `checkRegistry()`.
+
+### Adding a source
+
+1. Append the id to `SOURCES` in `src/schema/usage.ts`.
+2. Add a `SOURCE_META` entry in `registry.ts`. The table is typed
+   `Record<Source, SourceMeta>`, so `npm run typecheck` fails until you do.
+   Pick an unused `#rrggbb` color (`checkRegistry()` is tested).
+3. Write `src/adapters/<id>.ts`: a pure `parse…()` function plus an adapter
+   whose `load()` parses a bundled sample, with a `// REAL DATA PLUGS IN HERE`
+   block explaining what real export replaces the sample.
+4. Add a fictional sample under `data/sample/` (with a `#` FICTIONAL header),
+   add the adapter to `BUILTIN_ADAPTERS` in `registry.ts`.
+5. Add `tests/adapters/<id>.test.ts`. The registry tests check that the
+   metadata `unitType` matches what the adapter emits.
+
+Never hard-code a `Record<Source, …>` literal elsewhere; use the registry or
+`emptyBySource()` from `src/aggregate.ts`.
