@@ -73,8 +73,9 @@ export type WeekTotals = {
   bySource: Record<Source, number>;
 };
 
-function emptyBySource(): Record<Source, number> {
-  return { 'grok-bot': 0, cursor: 0, azure: 0 };
+/** A zeroed per-source map built from SOURCES, so new sources need no edits here. */
+export function emptyBySource(): Record<Source, number> {
+  return Object.fromEntries(SOURCES.map((s) => [s, 0])) as Record<Source, number>;
 }
 
 function compareDates(a: string, b: string): number {
