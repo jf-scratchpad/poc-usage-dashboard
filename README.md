@@ -41,7 +41,7 @@ CI (`.github/workflows/ci.yml`) runs `npm ci`, typecheck, the limits check, test
 ## Data flow
 
 ```
-data/sample/<source>.*   ->  src/adapters/<source>.ts  ->  validateRecords()  ->  loadAllUsage()  ->  src/aggregate.ts + src/app (charts)
+data/sample/<source>-*.*  ->  src/adapters/<source>.ts  ->  validateRecords()  ->  loadAllUsage()  ->  src/aggregate.ts + src/app (charts)
  (raw, source-shaped)        (parse + map to schema)       (src/schema/usage.ts)  (src/adapters/index.ts)   (Chart.js, static)
 ```
 
@@ -64,16 +64,16 @@ Each adapter implements `UsageAdapter { source; load(): Promise<UsageRecord[]> }
 
 | Source | Adapter | Sample file | Real data would come from |
 | --- | --- | --- | --- |
-| Grok Bot | `src/adapters/grok-bot.ts` | `data/sample/grok-bot.*` | Grok Bot plan usage export (per-bot / per-routine usage) |
-| Cursor | `src/adapters/cursor.ts` | `data/sample/cursor.*` | Cursor dashboard usage export (team/admin usage CSV) |
-| Azure | `src/adapters/azure.ts` | `data/sample/azure.*` | Azure Cost Management export or Cost Details API (daily, by resource group/meter) |
+| Grok Bot | `src/adapters/grok-bot.ts` | `data/sample/grok-bot-usage.json` | Grok Bot plan usage export (per-bot / per-routine usage) |
+| Cursor | `src/adapters/cursor.ts` | `data/sample/cursor-usage.csv` | Cursor dashboard usage export (team/admin usage CSV) |
+| Azure | `src/adapters/azure.ts` | `data/sample/azure-cost-management.csv` | Azure Cost Management export or Cost Details API (daily, by resource group/meter) |
 
-Each adapter file marks the exact plug-in spot with a `REAL DATA` comment.
+Each adapter file marks the exact plug-in spot with a `// REAL DATA PLUGS IN HERE` comment; [docs/adapters.md](docs/adapters.md) has the per-source details. The sample covers 2026-08-31 to 2026-11-22, so the weekly tiles are anchored to the latest data day (Nov 22) rather than today; with live data they follow today in America/New_York.
 
 ## Adding a source
 
 1. Add the id to `SOURCES` in `src/schema/usage.ts`.
-2. Add a raw sample file at `data/sample/<source>.*` (fake data only).
+2. Add a raw sample file under `data/sample/`, named after the source's export (fake data only).
 3. Write `src/adapters/<source>.ts` implementing `UsageAdapter`, mapping raw rows to `UsageRecord` and calling `validateRecords`.
 4. Register it in `src/adapters/index.ts` so `loadAllUsage()` includes it.
 5. Add `tests/adapters/<source>.test.ts` (parses the sample, validates, maps fields, rejects bad rows).

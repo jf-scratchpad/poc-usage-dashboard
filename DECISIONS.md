@@ -32,7 +32,11 @@ Every notable choice and why. Newest additions go at the bottom of their section
 - **`src/aggregate.ts` is the canonical rollup module.** Collectors did not add a second copy; the web app's helpers are the ones to import.
 - **Units are summed even when `unit_type` differs, and the table labels that as "mixed units".** Cost is always USD and is the ranking key; mixed unit counts would otherwise look like a single quantity.
 - **The assistant bar chart caps at 15 rows; the top-consumers table caps at 10.** Keeps the layout readable when collectors later return long tails.
+- **Tiles and trend axis are anchored to the latest data day when the data ends before today** (`dataAsOf` in `src/app/dates.ts`, added in integration). The sample stops on Sun 2026-11-22, so anchoring to today (Wed Nov 25) drew a fake $0 week and a -100% week-over-week. With live data the latest day is today, so the America/New_York rule above still applies.
 - **The page renders an empty state when `loadAllUsage()` returns no records.** That path remains for an empty export; collectors now feed the charts from the bundled sample data.
+
+- **One ~600 kB JS bundle; Vite's 500 kB chunk-size warning is accepted.** Most of it is the bundled sample data plus Chart.js. Code-splitting a single-page static trial isn't worth the complexity.
+- **Sample file names follow each source's native export** (`grok-bot-usage.json`, `cursor-usage.csv`, `azure-cost-management.csv`) rather than the brief's `data/sample/<source>.*`. Docs were updated to match instead of renaming the collectors' files.
 
 ## Data and security
 
