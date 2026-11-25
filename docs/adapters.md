@@ -103,7 +103,7 @@ API: `getSourceMeta(id)`, `listSourceMeta()`, `sourceLabel(id)`,
 ### Adding a source
 
 1. Append the id to `SOURCES` in `src/schema/usage.ts`.
-2. Add a `SOURCE_META` entry in `registry.ts`. The table is typed
+2. Add a `SOURCE_META` entry in `src/adapters/sources.ts` (metadata only, so the UI can import it without the sample data). The table is typed
    `Record<Source, SourceMeta>`, so `npm run typecheck` fails until you do.
    Pick an unused `#rrggbb` color (`checkRegistry()` is tested).
 3. Write `src/adapters/<id>.ts`: a pure `parse…()` function plus an adapter

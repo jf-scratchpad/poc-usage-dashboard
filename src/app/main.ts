@@ -1,5 +1,5 @@
 import './styles.css';
-import { loadAllUsage } from '../adapters/index';
+import { loadUsageData } from '../data/load';
 import { dataAsOf, todayInTimeZone } from './dates';
 import { renderApp } from './render';
 
@@ -10,7 +10,8 @@ async function main(): Promise<void> {
   }
 
   try {
-    const records = await loadAllUsage();
+    // Collected public/data/usage.v1.json first; bundled adapters as fallback.
+    const { records } = await loadUsageData();
     renderApp(el, records, { asOf: dataAsOf(records, todayInTimeZone()) });
   } catch (err) {
     el.replaceChildren();

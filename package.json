@@ -13,7 +13,9 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "check:limits": "vitest run tests/limits.test.ts"
+    "check:limits": "vitest run tests/limits.test.ts",
+    "collect": "node scripts/collect.mjs",
+    "collect:check": "node scripts/collect.mjs --check"
   },
   "devDependencies": {
     "@types/node": "^20.17.0",
