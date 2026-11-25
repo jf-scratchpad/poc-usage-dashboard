@@ -2,6 +2,12 @@
 
 Versions in this file describe the product as built in this repo. They are not git tags or GitHub Releases.
 
+## 2.0.1 — 2026-11-25
+
+### Fixed
+
+- The repository was renamed to `poc-usage-dashboard`, so the Pages build now uses `VITE_BASE=/poc-usage-dashboard/`. The old base made the published page load blank (scripts and styles pointed at `/usage-dashboard-trial/`). The site is now at https://jf-scratchpad.github.io/poc-usage-dashboard/.
+
 ## 2.0.0 — 2026-11-25
 
 Usage Dashboard v2, still sample-data only, in the same private scratch repo.

@@ -1,4 +1,4 @@
-# usage-dashboard-trial
+# poc-usage-dashboard
 
 A static web dashboard of AI usage and spend **per assistant** and **per week**, with trend lines, budgets, forecasts, and anomaly detection. Sources: **Grok Bot**, **Cursor**, **Azure Cost Management**, and a fictional **LLM API (direct)** source.
 
@@ -6,10 +6,10 @@ A static web dashboard of AI usage and spend **per assistant** and **per week**,
 
 ## Viewing the site
 
-- **GitHub Pages** (no local install): [https://jf-scratchpad.github.io/usage-dashboard-trial/](https://jf-scratchpad.github.io/usage-dashboard-trial/). All numbers are fictional sample data. The published site is reachable by anyone with the link. Pages was enabled with Source: GitHub Actions on 2026-11-25.
+- **GitHub Pages** (no local install): [https://jf-scratchpad.github.io/poc-usage-dashboard/](https://jf-scratchpad.github.io/poc-usage-dashboard/). All numbers are fictional sample data. The published site is reachable by anyone with the link. Pages was enabled with Source: GitHub Actions on 2026-11-25.
 - **Locally:** `npm ci`, then `npm run dev` (hot reload) or `npm run build` && `npm run preview`. Opening `dist/index.html` as a file does not work (browsers block ES modules from `file://`).
 
-The Pages workflow (`.github/workflows/pages.yml`) builds with `VITE_BASE=/usage-dashboard-trial/` and deploys on every push to `main`. There is no custom domain and nothing else is deployed.
+The Pages workflow (`.github/workflows/pages.yml`) builds with `VITE_BASE=/poc-usage-dashboard/` and deploys on every push to `main`. There is no custom domain and nothing else is deployed.
 
 ## Screens and routes
 
@@ -70,7 +70,7 @@ src/data/load.ts  →  engines (aggregate, budgets, forecast, anomaly, allocatio
 src/ui/  (hash-routed views, Chart.js)
 ```
 
-The site fetches `./data/manifest.json` and `./data/usage.v1.json` from the same origin (relative URLs, so this works under `/usage-dashboard-trial/`). If that fails, it falls back to the bundled sample adapters. There is still no call to any live usage API.
+The site fetches `./data/manifest.json` and `./data/usage.v1.json` from the same origin (relative URLs, so this works under `/poc-usage-dashboard/`). If that fails, it falls back to the bundled sample adapters. There is still no call to any live usage API.
 
 Every adapter turns its source's raw format into the common `UsageRecord`:
 

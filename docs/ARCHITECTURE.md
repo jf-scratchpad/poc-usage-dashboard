@@ -1,6 +1,6 @@
 # Architecture
 
-A build-time static site with no backend. `npm run collect` turns the fictional sample exports into a versioned JSON dataset in `public/data/`; the site loads that same-origin file with a relative URL (so it works under `/usage-dashboard-trial/`), falling back to the adapters bundled in a lazy chunk, and runs pure engines in the browser. Nothing contacts a third-party host, account, or live usage API.
+A build-time static site with no backend. `npm run collect` turns the fictional sample exports into a versioned JSON dataset in `public/data/`; the site loads that same-origin file with a relative URL (so it works under `/poc-usage-dashboard/`), falling back to the adapters bundled in a lazy chunk, and runs pure engines in the browser. Nothing contacts a third-party host, account, or live usage API.
 
 ```mermaid
 flowchart LR
@@ -27,7 +27,7 @@ flowchart LR
   end
   UI["src/ui/ views<br/>overview · assistant · source · budgets · forecast · anomalies"]
   DIST[("dist/ static files")]
-  PAGES["GitHub Pages<br/>/usage-dashboard-trial/"]
+  PAGES["GitHub Pages<br/>/poc-usage-dashboard/"]
   G & C & A & L --> AD --> REG
   REG -- "npm run collect (build time)" --> PIPE --> OUT
   OUT -- "fetch ./data/* (same origin)" --> LOAD
@@ -43,7 +43,7 @@ flowchart LR
 - **Collect and load**: `npm run collect` (`scripts/collect.mjs` → `scripts/collect-run.ts`) runs every adapter through `normalizeBatches()`, which validates every row (all errors at once), drops exact duplicates on day × source × assistant × unit type, and fails on conflicting duplicates. It writes a versioned dataset and a manifest (counts, date range, per-source totals). `generated_at` comes from the last data day, so output is byte-identical across runs; `collect:check` fails if the committed files are stale. `src/data/load.ts` fetches `./data/manifest.json` then the dataset it names, re-validates, and on any problem falls back to a dynamic import of the bundled adapters (which also keeps ~440 kB of raw samples out of the initial chunk).
 - **Engines** (pure TypeScript, no DOM, no fetch; math in [analytics.md](analytics.md)): `src/aggregate.ts` (ISO weeks, by assistant, top consumers, filters), `src/budgets.ts` + `config/budgets.json`, `src/forecast.ts`, `src/anomaly.ts`, `src/allocation.ts`, `src/data/quality.ts`, `src/insights.ts`.
 - **UI** (`src/ui/`, entry `src/ui/main.ts`): a small hash router, URL-synced filters, lazy views (overview, assistant, source, budgets, forecast, anomalies), Chart.js on demand, theme, and export. See [UI.md](UI.md). Shared date/label helpers still live in `src/app/`.
-- **Build**: `vite build` writes `dist/` with relative asset paths (`base: './'`). The Pages workflow sets `VITE_BASE=/usage-dashboard-trial/` and publishes `dist/` to GitHub Pages (Jose's approved v2 exception). No other deploy or custom domain.
+- **Build**: `vite build` writes `dist/` with relative asset paths (`base: './'`). The Pages workflow sets `VITE_BASE=/poc-usage-dashboard/` and publishes `dist/` to GitHub Pages (Jose's approved v2 exception). No other deploy or custom domain.
 
 ## Quality gates
 

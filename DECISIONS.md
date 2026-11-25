@@ -79,7 +79,7 @@ Every notable choice and why. Newest additions go at the bottom of their section
 ## v2 GitHub Pages (track C)
 
 - **Jose approved publishing this site to GitHub Pages today** (this repo only). No other deploy, DNS, or custom domain.
-- **Vite `base` stays `'./'` locally and in CI; the Pages workflow sets `VITE_BASE=/usage-dashboard-trial/`.** Relative paths keep `vite preview` working; the absolute project path is what GitHub Pages needs at `https://jf-scratchpad.github.io/usage-dashboard-trial/`.
+- **Vite `base` stays `'./'` locally and in CI; the Pages workflow sets `VITE_BASE=/poc-usage-dashboard/`.** Relative paths keep `vite preview` working; the absolute project path is what GitHub Pages needs at `https://jf-scratchpad.github.io/poc-usage-dashboard/`.
 - **`.github/workflows/pages.yml` uses official actions** (`actions/configure-pages@v6`, `actions/upload-pages-artifact@v5`, `actions/deploy-pages@v5`) on `push` to `main` and `workflow_dispatch`. Checkout and setup-node stay at `@v4`, same as CI. `pages: write` and `id-token: write` are granted only on the deploy job; the build job also has `pages: write` because `upload-pages-artifact` requires it. Workflow-level permissions stay `contents: read`.
 - **Creating the Pages site via `POST /pages` also requires `administration:write`.** The app has `pages: write` (GET returns 404 until a site exists) but not Administration, so enablement is a one-time Settings → Pages → Source: GitHub Actions click (or a later grant of Administration). The workflow does not set `enablement: true`, which would fail for the same reason. Repo visibility will not be changed if the org plan does not support private Pages.
 
@@ -94,7 +94,7 @@ Every notable choice and why. Newest additions go at the bottom of their section
 
 ## UI v2 (track B)
 
-- **Own ~150-line hash router (`src/ui/router.ts`) instead of a framework or router library.** Hash routes (`#/assistant/Cody?range=4w`) work from any subpath, including GitHub Pages' `/usage-dashboard-trial/`, with no server rewrites and no new dependency.
+- **Own ~150-line hash router (`src/ui/router.ts`) instead of a framework or router library.** Hash routes (`#/assistant/Cody?range=4w`) work from any subpath, including GitHub Pages' `/poc-usage-dashboard/`, with no server rewrites and no new dependency.
 - **All global filters live in the URL query inside the hash, and defaults are omitted.** Every view is a shareable link; the back button undoes discrete filter changes, while assistant-search typing uses `replaceState` so it doesn't flood history.
 - **Default range is "All time"; presets 4w/12w are whole ISO weeks ending with the latest data week.** Week buckets and the chart axis line up, and the current partial week stays visible.
 - **Views and Chart.js load through dynamic `import()`; the bundled sample adapters are a fallback chunk.** The initial JS dropped from ~615 kB to ~27 kB; Chart.js (~177 kB) and the sample data (~424 kB) load only when needed (the sample only when `data/usage.v1.json` is missing, via track A's `loadUsageData`).
