@@ -174,6 +174,10 @@ export function barChart(canvas: HTMLCanvasElement, spec: BarSpec, theme: Theme)
       const first = elements[0];
       if (first) cb(spec.labels[first.index] ?? '', first.index);
     };
+    options.onHover = (evt, elements) => {
+      const target = evt.native?.target;
+      if (target instanceof HTMLElement) target.style.cursor = elements.length ? 'pointer' : 'default';
+    };
   }
   const chart = new Chart<'bar'>(canvas, {
     type: 'bar',

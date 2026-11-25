@@ -115,6 +115,10 @@ export function render(ctx: ViewContext): ViewResult {
     ctx.charts.bar(topFig.canvas, {
       labels: topRows.map((c) => `${c.assistant_or_project} (${SOURCE_LABELS[c.source]})`),
       horizontal: true,
+      onClickLabel: (_label, i) => {
+        const c = topRows[i];
+        if (c) ctx.navigate({ name: 'assistant', assistant: c.assistant_or_project });
+      },
       series: [{ label: 'Spend', data: topRows.map((c) => round2(c.cost_usd)), color: sourceColor(topRows[0]?.source ?? SOURCES[0]), colors: topRows.map((c) => sourceColor(c.source)) }],
     }),
   ]).then(() => undefined);
