@@ -47,8 +47,9 @@ The Pages workflow (`.github/workflows/pages.yml`) builds with `VITE_BASE=/usage
 | `npm run check:limits` | Scan the repo for secrets, hardware identifiers, and key files |
 | `npm run check:bundle` | Fail if the `dist/` bundle exceeds the size budget |
 | `npm run check:links` | Check documentation links in README, docs, and decision/changelog files |
+| `npm run test:e2e` | Browser smoke tests against the built `dist/` (uses system Chrome locally) |
 
-CI (`.github/workflows/ci.yml`) runs `npm ci`, typecheck, the limits check, `collect:check`, tests with coverage thresholds, the build, a bundle-size budget check, and a documentation link check, and confirms `dist/index.html` exists, on every pull request and every push to `main`. The limits scanner still runs as its own named step and as part of `npm test`.
+CI (`.github/workflows/ci.yml`) runs `npm ci`, typecheck, the limits check, `collect:check`, tests with coverage thresholds, the build, a bundle-size budget check, a documentation link check, and end-to-end smoke tests, and confirms `dist/index.html` exists, on every pull request and every push to `main`. The limits scanner still runs as its own named step and as part of `npm test`.
 
 ## Data flow
 
