@@ -10,7 +10,7 @@ A static web dashboard of AI usage and spend **per assistant** and **per week**,
 - **Spend by assistant**: total cost per assistant or project.
 - **Top consumers**: the highest-cost assistants/projects, with cost and units.
 - **Source filter**: show Grok Bot, Cursor, Azure, or any mix.
-- **Empty state**: until collectors are wired into `loadAllUsage()`, the page still renders and explains that no records have loaded.
+- **Empty state**: if `loadAllUsage()` returns no records, the page still renders and explains that none have loaded.
 
 ## Quick start
 
@@ -86,4 +86,5 @@ Each adapter file marks the exact plug-in spot with a `REAL DATA` comment.
 ## More
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): how the pieces fit.
+- [docs/adapters.md](docs/adapters.md): each collector and its real-data plug-in point.
 - [DECISIONS.md](DECISIONS.md): every notable choice and why.

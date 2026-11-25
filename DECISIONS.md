@@ -10,6 +10,7 @@ Every notable choice and why. Newest additions go at the bottom of their section
 - **Vite 6, Vitest 3, TypeScript 5.9, Chart.js 4.** Current major versions at the time, all supporting Node 20.
 - **`base: './'` in Vite.** The built `dist/` uses relative paths, so it works from any folder without a server path config. No deploy target is assumed.
 - **Box tooling ran Node 24 / npm 11; CI runs Node 20.** The lockfile (v3) is compatible with npm 10 on Node 20, and CI is the source of truth.
+- **Hand-rolled CSV parser (`src/adapters/csv.ts`) instead of a library.** Stays on the approved stack with no extra dependency. Understands quoted fields, comment lines, and a BOM so the fictional headers in the sample CSVs are skipped.
 - **Vanilla TypeScript for the UI, no framework.** Preferred for this small static dashboard; keeps the bundle and CI surface small.
 - **happy-dom for DOM-level tests.** Lighter than launching a browser, and enough to assert the filter, table, tiles, and chart canvases once CanvasRenderingContext2D is stubbed for Chart.js.
 
@@ -28,10 +29,10 @@ Every notable choice and why. Newest additions go at the bottom of their section
 - **Week = ISO week starting Monday, computed from the calendar date (equivalent to UTC).** A standard, locale-independent definition, so the same data gives the same weekly buckets for everyone. The week-year follows the ISO Thursday rule.
 - **"This week" / "last week" tiles use today's date in America/New_York.** Record dates have no time zone, but the summary should follow Jose's local week rather than UTC.
 - **Four views: spend by week (one line per source plus a dashed total), spend by assistant, top consumers, source filter.** Exactly the brief's list.
-- **`src/aggregate.ts` is the canonical rollup module.** Other tracks should import it rather than reimplement week, source, or top-consumer helpers.
+- **`src/aggregate.ts` is the canonical rollup module.** Collectors did not add a second copy; the web app's helpers are the ones to import.
 - **Units are summed even when `unit_type` differs, and the table labels that as "mixed units".** Cost is always USD and is the ranking key; mixed unit counts would otherwise look like a single quantity.
 - **The assistant bar chart caps at 15 rows; the top-consumers table caps at 10.** Keeps the layout readable when collectors later return long tails.
-- **The page renders an empty state when `loadAllUsage()` returns no records.** The filter, chart canvases, and table stay in place so the UI works before collectors land.
+- **The page renders an empty state when `loadAllUsage()` returns no records.** That path remains for an empty export; collectors now feed the charts from the bundled sample data.
 
 ## Data and security
 
@@ -39,6 +40,14 @@ Every notable choice and why. Newest additions go at the bottom of their section
 - **Hard limits enforced in CI by a repo scanner (`scripts/limits.ts`, `tests/limits.test.ts`).** Catches private keys, common token formats, hard-coded credentials, MAC addresses, serial-number/hardware-UUID fields, and key/env files. Test fixtures are assembled at runtime so the test file doesn't trip itself.
 - **`package-lock.json` is not content-scanned.** It's generated and full of integrity hashes; it is still checked by file name like everything else.
 - **CI uses `permissions: contents: read` and pinned major versions of official actions (`actions/checkout@v4`, `actions/setup-node@v4`).** Least privilege; no secrets are used in CI at all.
+
+## Collectors
+
+- **Sample data covers 2026-08-31 through 2026-11-22 (12 weeks) with weekday/weekend variation, a gentle upward trend, and three invented spikes** (mid-September Azure OpenAI, mid-October coding push, mid-November pre-trial week). IDs use the obviously fake placeholder `00000000-0000-0000-0000-000000000000`.
+- **Vite JSON import for Grok Bot; `?raw` imports for the Cursor and Azure CSVs.** Sample data is bundled at build time. There is no filesystem access and no network call at runtime.
+- **Cursor events roll up to one record per day × project.** The native export is finer-grained (kind/model); the schema is one day × source × assistant/project.
+- **Azure line items roll up to one record per day × project tag (`unit_type` is `USD`).** Cost Management meters use incomparable units (hours, GB, tokens), so summing quantities would mislead. `units` equals the summed `PreTaxCost`. The project comes from `Tags.project`, falling back to `ResourceGroup`.
+- **Azure dates accept `YYYY-MM-DD` and `yyyyMMdd`; non-USD currency is rejected.** Some Cost Management Query API responses use compact `UsageDate` values. Currency conversion belongs at the real-data plug-in point, not in the static app.
 
 ## Process
 
