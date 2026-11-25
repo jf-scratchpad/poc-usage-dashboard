@@ -5,9 +5,9 @@ A build-time static site. There is no backend and no runtime network call: sampl
 ```mermaid
 flowchart LR
   subgraph data["data/sample/ (fake)"]
-    G[grok-bot.*]
-    C[cursor.*]
-    A[azure.*]
+    G[grok-bot-usage.json]
+    C[cursor-usage.csv]
+    A[azure-cost-management.csv]
   end
   subgraph adapters["src/adapters/"]
     GA[grok-bot.ts]
@@ -31,7 +31,7 @@ flowchart LR
 ## Pieces
 
 - **Schema** (`src/schema/usage.ts`): the one contract. `UsageRecord { date, source, assistant_or_project, units, unit_type, cost_usd }`, `validateRecord(s)` with clear errors, and the `UsageAdapter` interface (async `load()`).
-- **Adapters** (`src/adapters/<source>.ts`): one per source. Each parses its raw, source-shaped sample (`data/sample/<source>.*`), maps to `UsageRecord`, and validates. The `REAL DATA` comment marks where a live export would replace the sample read.
+- **Adapters** (`src/adapters/<source>.ts`): one per source. Each parses its raw, source-shaped sample (`data/sample/`, named after each source's native export), maps to `UsageRecord`, and validates. The `REAL DATA PLUGS IN HERE` comment marks where a live export would replace the sample read.
 - **Registry** (`src/adapters/index.ts`): `loadAllUsage()` runs every adapter and concatenates results. It's the only thing the app imports from the data layer.
 - **Aggregation** (`src/aggregate.ts`): pure functions over `UsageRecord[]`: spend by ISO week (Monday start, computed from the calendar date), spend by assistant, top consumers, week-over-week, and filtering by source. Pure so it's unit-testable without a browser. Other tracks should import this module rather than reimplementing it.
 - **Views** (`index.html`, `src/app/`): Chart.js charts for spend by week (trend lines), spend by assistant, top consumers, plus the source filter controls.

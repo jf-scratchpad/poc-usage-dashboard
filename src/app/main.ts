@@ -1,6 +1,6 @@
 import './styles.css';
 import { loadAllUsage } from '../adapters/index';
-import { todayInTimeZone } from './dates';
+import { dataAsOf, todayInTimeZone } from './dates';
 import { renderApp } from './render';
 
 async function main(): Promise<void> {
@@ -11,7 +11,7 @@ async function main(): Promise<void> {
 
   try {
     const records = await loadAllUsage();
-    renderApp(el, records, { asOf: todayInTimeZone() });
+    renderApp(el, records, { asOf: dataAsOf(records, todayInTimeZone()) });
   } catch (err) {
     el.replaceChildren();
     const p = document.createElement('p');
