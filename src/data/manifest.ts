@@ -4,6 +4,7 @@
  */
 import { SOURCES, validateRecords, type Source, type UsageRecord } from '../schema/usage';
 import { sourceLabel } from '../adapters/sources';
+import { qualityReport } from './quality';
 
 export const SCHEMA = 'usage.v1';
 export const SCHEMA_VERSION = 1;
@@ -40,6 +41,12 @@ export type Manifest = {
   total_cost_usd: number;
   duplicates_removed: number;
   sources: ManifestSource[];
+  /** Day coverage per source over the period; gaps are days with no record (not zero spend). */
+  quality: {
+    coverage_pct: Record<string, number>;
+    gap_days: Record<string, number>;
+    warnings: string[];
+  };
 };
 
 /** Rounds to 4 decimal places (sub-cent), avoiding float noise in the JSON. */
@@ -82,6 +89,16 @@ export function buildManifest(records: readonly UsageRecord[], options?: { dupli
     total_cost_usd: round4(records.reduce((s, r) => s + r.cost_usd, 0)),
     duplicates_removed: options?.duplicatesRemoved ?? 0,
     sources,
+    quality: manifestQuality(records),
+  };
+}
+
+function manifestQuality(records: readonly UsageRecord[]): Manifest['quality'] {
+  const q = qualityReport(records);
+  return {
+    coverage_pct: Object.fromEntries(q.sources.map((s) => [s.id, s.coverage_pct])),
+    gap_days: Object.fromEntries(q.sources.map((s) => [s.id, s.gaps.reduce((n, g) => n + g.days, 0)])),
+    warnings: q.warnings,
   };
 }
 

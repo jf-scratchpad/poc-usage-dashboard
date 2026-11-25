@@ -16,5 +16,6 @@ export async function run(): Promise<{ files: Record<string, string>; summary: s
   };
   const per = manifest.sources.map((s) => `${s.id}=${s.record_count}`).join(' ');
   const summary = `${manifest.record_count} records (${per}), ${manifest.period_start}..${manifest.period_end}, $${manifest.total_cost_usd.toFixed(2)}, ${manifest.duplicates_removed} duplicates removed`;
-  return { files, summary };
+  const warnings = manifest.quality.warnings.map((w) => `\n  warning: ${w}`).join('');
+  return { files, summary: summary + warnings };
 }

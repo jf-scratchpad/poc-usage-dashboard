@@ -73,3 +73,4 @@ flowchart LR
 - `src/forecast.ts`: next 4 weeks of spend per source or total, linear (OLS + prediction interval) or EWMA, with a low/high band.
 - `src/anomaly.ts`: rolling z-score spike detection per total, source, or source × assistant.
 - `src/allocation.ts`: per-assistant cost across sources, cost per unit, and one assistant's weekly drill-down.
+- `src/data/quality.ts` (coverage and gaps, also summarized in the manifest) and `src/insights.ts` (`buildInsights()`, one call over every engine).
