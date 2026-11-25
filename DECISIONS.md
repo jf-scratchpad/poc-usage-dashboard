@@ -69,3 +69,10 @@ Every notable choice and why. Newest additions go at the bottom of their section
 - **Dedupe on day × source × assistant × unit type; exact duplicates (within 5e-7) dropped and counted, conflicting ones are errors.** Silent last-wins would hide double-exported or mismatched rows.
 - **The site fetches its own static `./data/*.json` (same origin, relative URL) with a bundled fallback.** This is not an external network call: no third-party host, credential, or API. Fallback via dynamic import keeps the initial JS chunk ~195 kB instead of ~640 kB.
 - **Source metadata split into `src/adapters/sources.ts`.** The UI imports labels/colors without importing the adapters (and their bundled samples).
+
+## v2 GitHub Pages (track C)
+
+- **Jose approved publishing this site to GitHub Pages today** (this repo only). No other deploy, DNS, or custom domain.
+- **Vite `base` stays `'./'` locally and in CI; the Pages workflow sets `VITE_BASE=/usage-dashboard-trial/`.** Relative paths keep `vite preview` working; the absolute project path is what GitHub Pages needs at `https://jf-scratchpad.github.io/usage-dashboard-trial/`.
+- **`.github/workflows/pages.yml` uses official actions** (`actions/configure-pages@v6`, `actions/upload-pages-artifact@v5`, `actions/deploy-pages@v5`) on `push` to `main` and `workflow_dispatch`. Checkout and setup-node stay at `@v4`, same as CI. `pages: write` and `id-token: write` are granted only on the deploy job; the build job also has `pages: write` because `upload-pages-artifact` requires it. Workflow-level permissions stay `contents: read`.
+- **Creating the Pages site via `POST /pages` also requires `administration:write`.** The app has `pages: write` (GET returns 404 until a site exists) but not Administration, so enablement is a one-time Settings → Pages → Source: GitHub Actions click (or a later grant of Administration). The workflow does not set `enablement: true`, which would fail for the same reason. Repo visibility will not be changed if the org plan does not support private Pages.
