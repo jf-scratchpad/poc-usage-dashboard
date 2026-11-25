@@ -30,8 +30,8 @@ describe('isValidDate', () => {
 });
 
 describe('isSource', () => {
-  it('knows exactly the three sources', () => {
-    expect([...SOURCES]).toEqual(['grok-bot', 'cursor', 'azure']);
+  it('knows exactly the four sources', () => {
+    expect([...SOURCES]).toEqual(['grok-bot', 'cursor', 'azure', 'llm-api']);
     expect(isSource('azure')).toBe(true);
     expect(isSource('Azure')).toBe(false);
     expect(isSource(undefined)).toBe(false);

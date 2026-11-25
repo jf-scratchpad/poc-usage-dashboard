@@ -15,6 +15,7 @@ exercise realistic parsing.
 | --- | --- | --- |
 | `grok-bot-usage.json` | Invented Grok Bot usage export (JSON) | One day × one assistant (requests, credits, cost) |
 | `cursor-usage.csv` | Invented Cursor admin usage export (CSV) | One day × project × kind/model event (requests, tokens, cost) |
+| `llm-api-usage.csv` | Invented vendor-neutral model-API usage export (CSV, v2) | One day × assistant × model (input/output tokens, cost) |
 | `azure-cost-management.csv` | Invented Azure Cost Management daily actual-cost export (CSV) | One day × resource/meter line (`PreTaxCost`, tags, quantity) |
 
 CSV files start with `#` comment lines stating they are fictional; the
