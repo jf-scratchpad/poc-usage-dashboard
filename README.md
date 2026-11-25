@@ -6,11 +6,12 @@ A static web dashboard of AI usage and spend **per assistant** and **per week**,
 
 ## What you get
 
-- **Spend by week**: a weekly trend line (ISO weeks, Monday start), per source plus a total.
-- **Spend by assistant**: total cost per assistant or project.
-- **Top consumers**: the highest-cost assistants/projects, with cost and units.
-- **Source filter**: show Grok Bot, Cursor, Azure, or any mix.
-- **Empty state**: if `loadAllUsage()` returns no records, the page still renders and explains that none have loaded.
+- **Overview**: tiles (total, weekly average, latest week vs prior, trend slope, active assistants, top source), weekly spend with a least-squares trend line, spend by source as a stacked area, and the top 10 consumers.
+- **Drill-downs and planning views** (`#/assistant/<name>`, `#/source/<id>`, `#/budgets`, `#/forecast`, `#/anomalies`) as they land in v2.
+- **Global filters synced to the URL**: date range (4 weeks, 12 weeks, all, custom), sources, and assistant search. Every link is shareable.
+- **Accessible by default**: keyboard navigation, visible focus, labelled controls, a color-blind-safe palette, and every chart's data as a table.
+- **Dark and light themes**, CSV / JSON export of the current view, and a print stylesheet.
+- **Empty, loading, and error states.** See [docs/UI.md](docs/UI.md).
 
 ## Quick start
 
