@@ -105,6 +105,7 @@ export function render(ctx: ViewContext): ViewResult {
     ctx.charts.bar(topFig.canvas, {
       labels: top.map((c) => c.assistant_or_project),
       horizontal: true,
+      onClickLabel: (label) => ctx.navigate({ name: 'assistant', assistant: label }),
       series: [{ label: 'Spend', data: top.map((c) => round2(c.cost_usd)), color }],
     }),
   ]).then(() => undefined);

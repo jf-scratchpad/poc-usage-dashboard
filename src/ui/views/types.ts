@@ -19,6 +19,8 @@ export type ViewContext = {
   charts: ChartHost;
   /** Href for another route that keeps the current filters. */
   hrefFor(route: Route): string;
+  /** Navigate to another route keeping the current filters (chart clicks). */
+  navigate(route: Route): void;
   /** Href for this route with filters reset. */
   resetHref: string;
 };

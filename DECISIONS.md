@@ -83,7 +83,7 @@ Every notable choice and why. Newest additions go at the bottom of their section
 
 ## v2 quality gates (track C)
 
-- **`@vitest/coverage-v8` (official Vitest coverage provider).** Enforces a coverage floor in `npm test` (88% lines/statements/functions, 80% branches). Browser bootstraps (`src/app/main.ts`, `src/ui/main.ts`) are excluded because end-to-end tests cover those paths. Justified as the official provider for the already-approved Vitest runner; no second test framework.
+- **`@vitest/coverage-v8` (official Vitest coverage provider).** Enforces a coverage floor in `npm test` (88% lines/statements/functions, 80% branches). The browser bootstrap (`src/ui/main.ts`) is excluded because end-to-end tests cover those paths. Justified as the official provider for the already-approved Vitest runner; no second test framework.
 - **Bundle-size budget after `vite build`.** Caps the largest JS asset at 900 KiB (200 KiB gzip) and `dist/` at 2 MiB. That is a regression budget with headroom after the v2 code-split (initial chunk is much smaller; the adapters fallback chunk is the largest JS). Implemented as a small `scripts/bundle-budget.ts` with no new dependency (`vite-node` already comes with Vite).
 - **Markdown link checker** (`scripts/check-links.ts`, no new dependency). Relative links in README, DECISIONS, CONTRIBUTING, CHANGELOG, `docs/`, and `data/sample/` must resolve to files; `http(s)` links are syntax-checked only, not fetched, so CI does not depend on the live Pages URL or the network.
 - **`collect:check` is now a CI step.** Track A's collect pipeline already had the script; quality CI runs it so a stale `public/data/` dataset fails the build.
@@ -99,7 +99,7 @@ Every notable choice and why. Newest additions go at the bottom of their section
 - **Every chart has its data as a `<table>` inside `<details>`, expanded when printing.** Screen-reader, keyboard, and print users get the same numbers, and export reuses those tables.
 - **CSV export = the view's primary table; JSON export = every table on the view plus the filters and URL.** CSV cells that start with `= + - @` get a leading `'` to prevent spreadsheet formula injection.
 - **Theme is `html[data-theme]`, toggled by a button and saved in `localStorage` (`ud-theme`); first visit follows the OS preference.** Charts re-render on toggle so axis and grid colors match.
-- **v1 `src/app/render.ts` / `charts.ts` stay in the tree (still tested) until v2 covers every view; `index.html` now boots `src/ui/main.ts`.**
+- **v1 UI removed once v2 covered every view** (`src/app/render.ts`, `charts.ts`, `main.ts`, `styles.css` and their test). `index.html` boots `src/ui/main.ts`; `src/app/format.ts` and `dates.ts` stay as shared helpers.
 - **`tests/ui/bundle-boundaries.test.ts` fails if the UI entry point statically reaches Chart.js, an adapter (other than `sources.ts` metadata), sample data, or a view module.** Keeps the initial chunk small as tracks add modules.
 - **Drill-down pages pin their subject and bypass the one filter that could hide it.** `#/assistant/<name>` ignores the assistant search (dates and sources still apply); `#/source/<id>` ignores the source filter and shows a note when that source is unchecked. Otherwise a shared link could open on an empty page.
 - **Assistant names match case-insensitively across sources** (same rule as track A's allocation), so "Cody" in Grok Bot and "cody" in LLM API are one assistant with one rank. Units are never added across unit types; cost per unit is shown per source and unit type.

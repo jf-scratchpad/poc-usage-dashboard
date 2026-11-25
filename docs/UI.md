@@ -39,6 +39,12 @@ Vanilla TypeScript + Chart.js, no framework. Code lives in `src/ui/`; the entry 
 3. Return the view's tables in `ViewResult.tables` (first one = CSV export).
 4. Add a happy-dom test under `tests/ui/` using `mountApp()` from `tests/ui/mount.ts`.
 
+## Interaction and print
+
+- Bars in "Top consumers" (overview) and "Assistants and projects" (source page) open the assistant drill-down on click; the same names are links in the data tables for keyboard and screen-reader users.
+- **Print** (toolbar button or Ctrl/Cmd+P) uses a light print stylesheet: filters, nav, and toolbar are hidden, panels avoid page breaks, and every chart's data table is expanded.
+- The layout collapses to one column under 760 px wide; nothing scrolls horizontally except wide tables inside their own scroller.
+
 ## Test hooks
 
 `#app-shell`, `nav[aria-label="Views"]`, `#filters`, `main#view[data-state=loading|ready|empty|error]`, `[data-view=<name>]`, `figure[data-chart=<id>]`, `table[data-table=<id>]`, `[data-tile=<id>]`, `#theme-toggle`, `[data-export=csv|json]`.

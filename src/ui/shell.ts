@@ -339,6 +339,7 @@ export class AppShell {
         theme: this.theme,
         charts: this.charts,
         hrefFor: (route) => formatHash(route, loc.filters),
+        navigate: (route) => this.navigate(route, loc.filters),
         resetHref: formatHash(loc.route, defaultFilters()),
       });
     } catch (err) {
