@@ -189,13 +189,20 @@ export class AppShell {
         'div',
         { class: 'field' },
         h('label', { for: 'f-q' }, 'Assistant search'),
-        h('input', { type: 'search', id: 'f-q', name: 'q', list: 'f-q-list', placeholder: 'e.g. Cody', autocomplete: 'off' }),
+        h('input', { type: 'search', id: 'f-q', name: 'q', list: 'f-q-list', placeholder: 'e.g. Cody', autocomplete: 'off', 'aria-describedby': 'f-q-hint' }),
+        h('span', { id: 'f-q-hint', class: 'visually-hidden' }, 'Filters every view. Press Enter on an exact name to open that assistant.'),
         h('datalist', { id: 'f-q-list' }),
       ),
       h('div', { class: 'field field-actions' }, h('button', { type: 'button', id: 'f-reset', class: 'button ghost' }, 'Reset filters')),
     );
     form.addEventListener('submit', (e) => e.preventDefault());
     form.addEventListener('change', (e) => this.onFilterChange(e));
+    form.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.target as HTMLElement).id === 'f-q') {
+        e.preventDefault();
+        this.openAssistantFromSearch();
+      }
+    });
     form.addEventListener('input', (e) => {
       if ((e.target as HTMLElement).id === 'f-q') this.onSearchInput();
     });
@@ -266,6 +273,19 @@ export class AppShell {
       const loc = this.router?.location;
       if (loc) this.navigate(loc.route, this.readForm(), true);
     }, 200);
+  }
+
+  /** Enter in the search box opens the drill-down when the text names exactly one assistant. */
+  openAssistantFromSearch(): boolean {
+    const loc = this.router?.location;
+    const input = must(this.form.querySelector<HTMLInputElement>('#f-q'));
+    const text = input.value.trim().toLowerCase();
+    const match = this.data?.records.find((r) => r.assistant_or_project.toLowerCase() === text);
+    if (!loc || !match) return false;
+    if (this.searchTimer) clearTimeout(this.searchTimer);
+    input.value = '';
+    this.navigate({ name: 'assistant', assistant: match.assistant_or_project }, { ...loc.filters, q: '' });
+    return true;
   }
 
   private populateFromData(data: Dataset): void {
