@@ -48,6 +48,8 @@ export type Series = {
   helper?: boolean;
   /** Draw the line without point markers (trend lines). */
   noPoints?: boolean;
+  /** Markers only, no connecting line (e.g. flagged weeks). */
+  pointsOnly?: boolean;
   width?: number;
   /** Per-bar colors (bar charts only). */
   colors?: string[];
@@ -141,8 +143,9 @@ function lineDataset(s: Series, stacked: boolean): ChartDataset<'line'> {
     borderDash: s.dash ?? [],
     borderWidth: s.width ?? 2,
     pointStyle: s.point ?? 'circle',
-    pointRadius: s.helper || s.noPoints ? 0 : 3,
-    pointHoverRadius: s.helper || s.noPoints ? 0 : 5,
+    pointRadius: s.helper || s.noPoints ? 0 : s.pointsOnly ? 7 : 3,
+    pointHoverRadius: s.helper || s.noPoints ? 0 : s.pointsOnly ? 9 : 5,
+    showLine: !s.pointsOnly,
     fill,
     tension: 0.2,
     spanGaps: false,
