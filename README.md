@@ -7,7 +7,8 @@ A static web dashboard of AI usage and spend **per assistant** and **per week**,
 ## What you get
 
 - **Overview**: tiles (total, weekly average, latest week vs prior, trend slope, active assistants, top source), weekly spend with a least-squares trend line, spend by source as a stacked area, and the top 10 consumers.
-- **Drill-downs and planning views** (`#/assistant/<name>`, `#/source/<id>`, `#/budgets`, `#/forecast`, `#/anomalies`) as they land in v2.
+- **Drill-downs**: per-assistant (`#/assistant/<name>`) and per-source (`#/source/<id>`) pages.
+- **Budgets** with progress bars, alert badges, and projected end-of-period spend; a 4-week **forecast** with a 95% band; and **anomalies** (flagged weeks with explanations).
 - **Global filters synced to the URL**: date range (4 weeks, 12 weeks, all, custom), sources, and assistant search. Every link is shareable.
 - **Accessible by default**: keyboard navigation, visible focus, labelled controls, a color-blind-safe palette, and every chart's data as a table.
 - **Dark and light themes**, CSV / JSON export of the current view, and a print stylesheet.

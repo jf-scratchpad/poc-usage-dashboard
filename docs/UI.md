@@ -24,6 +24,9 @@ Vanilla TypeScript + Chart.js, no framework. Code lives in `src/ui/`; the entry 
 - **Overview** (`#/`): tiles, weekly spend + trend line, stacked spend by source, top 10 consumers (links to drill-down).
 - **Assistant** (`#/assistant/<name>`): total, rank, share, sources, cost per unit; weekly spend by source (stacked) with a trend line; spend by source; units and cost per unit per source/unit type. Ignores the assistant search; names match case-insensitively.
 - **Source** (`#/source/<id>`): description from the registry, total, share of all spend, latest week, assistants, units; weekly spend + trend; assistants table with drill-down links. Ignores the source filter.
+- **Budgets** (`#/budgets`): one card per budget from `config/budgets.json` via `evaluateBudgets` (progress bar, status badge, projected end-of-period spend and status), summary tiles, table. Current period only; date range does not apply.
+- **Forecast** (`#/forecast`): next 4 weeks via `forecastWeekly` (linear, 95% band) with EWMA for comparison; per-source forecast totals.
+- **Anomalies** (`#/anomalies`): `detectAllAnomalies` across total, source, and assistant scopes; weekly line with flagged weeks marked; list with explanations and drill-down links.
 
 ## Filter query
 
