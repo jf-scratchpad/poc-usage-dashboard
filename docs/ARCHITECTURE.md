@@ -39,7 +39,7 @@ flowchart LR
 
 ## Quality gates
 
-- **CI** (`.github/workflows/ci.yml`, GitHub Actions, `permissions: contents: read`): `npm ci` → typecheck → hard-limits scan → tests → build → assert `dist/index.html` exists. Runs on pull requests and pushes to `main`.
+- **CI** (`.github/workflows/ci.yml`, GitHub Actions, `permissions: contents: read`): `npm ci` → typecheck → hard-limits scan → tests with coverage thresholds → build → assert `dist/index.html` exists → bundle-size budget → documentation link check. Runs on pull requests and pushes to `main`. Dependabot is configured (config file only) for npm and GitHub Actions.
 - **Tests** (Vitest): schema validation, each adapter against its sample, aggregation, a DOM-level render test of the dashboard (happy-dom), and the limits scanner.
 - **Limits scanner** (`scripts/limits.ts`): secrets and hardware-identifier patterns, run as part of `npm test` and as a separate named CI step.
 
@@ -72,3 +72,4 @@ flowchart LR
 - **Engines** (pure, documented in [analytics.md](analytics.md)): `src/budgets.ts` + `config/budgets.json` (burn, % used, run-rate projection, ok/warn/over).
 - `src/forecast.ts`: next 4 weeks of spend per source or total, linear (OLS + prediction interval) or EWMA, with a low/high band.
 - `src/anomaly.ts`: rolling z-score spike detection per total, source, or source × assistant.
+- `src/allocation.ts`: per-assistant cost across sources, cost per unit, and one assistant's weekly drill-down.

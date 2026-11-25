@@ -67,3 +67,22 @@ run (2026-10-26, LLM API), and Cody's pre-trial week (2026-11-16).
 API: `detectAnomalies(records, { scope, window, threshold, minHistory, minDeltaUsd, minStdevUsd, minStdevPct })`
 → `{ weekStart, scope, key, label, source?, assistant?, value, mean, stdev, zScore, reason }[]`
 (highest z first); `detectAllAnomalies(records, opts)`; `detectSeriesAnomalies(values, opts)`; `weeklySeries(records, scope)`.
+
+## Cost allocation — `src/allocation.ts`
+
+- `costByAssistantAcrossSources(records)`: one row per assistant/project name,
+  merged case-insensitively across sources (Cody's Grok Bot + LLM API spend;
+  the `ai-core` project's Cursor + Azure spend). Each row has
+  `total_cost_usd`, `share_pct` of all spend, `bySource`, `sources` (non-zero,
+  in SOURCES order), and `unitsByType`. `multiSourceAssistants()` keeps only
+  names seen in more than one source.
+- `unitEconomics(records)`: `cost_per_unit` and `cost_per_1k_units` for every
+  source × assistant × unit type (null when units are 0). Rows never mix unit
+  types, because requests, tokens, and USD aren't comparable.
+  `unitEconomicsBySource()` gives the same per source.
+- `assistantWeekly(records, name)`: zero-filled weekly cost per source for one
+  assistant, for the drill-down view.
+
+Merging by name is a convention: it assumes the same name means the same
+assistant or project in every source. A real deployment would map names with
+an explicit alias table at the collector plug-in point.
