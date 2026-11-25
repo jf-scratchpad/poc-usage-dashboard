@@ -47,3 +47,23 @@ range, not a guarantee). Values and lower bounds are clamped at 0.
 API: `forecastWeekly(records, { method, horizon = 4, alpha, z, source })` →
 `{ history: {weekStart, value}[], forecast: {weekStart, value, low, high}[], slope?, residualStdev }`;
 `forecastBySource(records, opts)`; lower-level `forecastSeries(values, opts)`, `linearRegression`, `ewma`.
+
+## Anomaly detection — `src/anomaly.ts`
+
+Weekly cost series are built per scope: `total`, `source`, or `assistant`
+(source × assistant, key `"<source>:<assistant>"`), zero-filled over the whole
+date range. For each week `t`:
+
+- `prior` = the previous `window` weeks (default 4; week `t` excluded).
+- `mean`, `s` = mean and sample standard deviation of `prior`.
+- `s′ = max(s, minStdevUsd = $1, minStdevPct = 5% × mean)`, a floor so flat series don't flag pennies.
+- `z = (value − mean) / s′`. Anomalous when `prior` has ≥ `minHistory` (3) weeks,
+  `z > threshold` (2), and `value − mean ≥ minDeltaUsd` ($5). Only spikes are reported.
+
+On the sample data this catches the invented spikes: Azure OpenAI (week of
+2026-09-21), the coding push (2026-10-12, Cursor + Grok Bot), the batch-evals
+run (2026-10-26, LLM API), and Cody's pre-trial week (2026-11-16).
+
+API: `detectAnomalies(records, { scope, window, threshold, minHistory, minDeltaUsd, minStdevUsd, minStdevPct })`
+→ `{ weekStart, scope, key, label, source?, assistant?, value, mean, stdev, zScore, reason }[]`
+(highest z first); `detectAllAnomalies(records, opts)`; `detectSeriesAnomalies(values, opts)`; `weeklySeries(records, scope)`.
