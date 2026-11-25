@@ -35,7 +35,7 @@ flowchart LR
 - **Registry** (`src/adapters/index.ts`): `loadAllUsage()` runs every adapter and concatenates results. It's the only thing the app imports from the data layer.
 - **Aggregation** (`src/aggregate.ts`): pure functions over `UsageRecord[]`: spend by ISO week (Monday start, computed from the calendar date), spend by assistant, top consumers, week-over-week, and filtering by source. Pure so it's unit-testable without a browser. Other tracks should import this module rather than reimplementing it.
 - **Views** (`index.html`, `src/app/`): Chart.js charts for spend by week (trend lines), spend by assistant, top consumers, plus the source filter controls.
-- **Build**: `vite build` produces `dist/` with relative asset paths (`base: './'`) so it can be served from any folder. Nothing is deployed.
+- **Build**: `vite build` produces `dist/` with relative asset paths (`base: './'`) so it can be served from any folder. The Pages workflow overrides this with `VITE_BASE=/usage-dashboard-trial/` and publishes `dist/` to GitHub Pages (Jose's approved v2 exception). No other deploy or custom domain.
 
 ## Quality gates
 
