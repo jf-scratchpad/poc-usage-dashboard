@@ -29,8 +29,8 @@ export type ViewLoaders = Record<RouteName, () => Promise<ViewModule>>;
 /** Each view is its own lazy chunk. */
 export const VIEW_LOADERS: ViewLoaders = {
   overview: () => import('./views/overview'),
-  assistant: () => import('./views/placeholder'),
-  source: () => import('./views/placeholder'),
+  assistant: () => import('./views/assistant'),
+  source: () => import('./views/source'),
   budgets: () => import('./views/placeholder'),
   forecast: () => import('./views/placeholder'),
   anomalies: () => import('./views/placeholder'),

@@ -19,6 +19,12 @@ Vanilla TypeScript + Chart.js, no framework. Code lives in `src/ui/`; the entry 
 
 `#/` overview · `#/assistant/<name>` · `#/source/<id>` · `#/budgets` · `#/forecast` · `#/anomalies` · anything else shows "not found".
 
+## Views
+
+- **Overview** (`#/`): tiles, weekly spend + trend line, stacked spend by source, top 10 consumers (links to drill-down).
+- **Assistant** (`#/assistant/<name>`): total, rank, share, sources, cost per unit; weekly spend by source (stacked) with a trend line; spend by source; units and cost per unit per source/unit type. Ignores the assistant search; names match case-insensitively.
+- **Source** (`#/source/<id>`): description from the registry, total, share of all spend, latest week, assistants, units; weekly spend + trend; assistants table with drill-down links. Ignores the source filter.
+
 ## Filter query
 
 `range=4w|12w|all|custom`, `from` / `to` (YYYY-MM-DD, custom only), `src=grok-bot,cursor` (empty = none), `q=<assistant search>`. Defaults are omitted, so `#/` means all time, every source, no search.
