@@ -1,4 +1,5 @@
 import { totalsByAssistant, weekOverWeekTrend } from '../../aggregate';
+import { costByAssistantAcrossSources } from '../../allocation';
 import { SOURCES } from '../../schema/usage';
 import { SOURCE_LABELS, formatPct, formatUsd } from '../../app/format';
 import { h } from '../dom';
@@ -90,7 +91,25 @@ export function render(ctx: ViewContext): ViewResult {
   // Top consumers are important enough to show the table open by default.
   topFig.figure.querySelector('details')?.setAttribute('open', '');
 
-  ctx.root.append(tiles, h('div', { class: 'grid' }, weekly.figure, stacked.figure, topFig.figure));
+  const merged = costByAssistantAcrossSources(records).slice(0, TOP_N);
+  const mergedSources = activeSources.filter((s) => merged.some((a) => a.bySource[s] > 0));
+  const mergedTable: DataTable = {
+    id: 'by-assistant',
+    title: 'Spend by assistant, sources merged',
+    columns: [
+      { key: 'assistant', label: 'Assistant or project' },
+      ...mergedSources.map((s) => ({ key: s, label: SOURCE_LABELS[s], kind: 'usd' as const })),
+      { key: 'total_usd', label: 'Total', kind: 'usd' },
+      { key: 'share', label: 'Share', kind: 'pct' },
+    ],
+    rows: merged.map((a) => [a.assistant, ...mergedSources.map((s) => round2(a.bySource[s])), round2(a.total_cost_usd), a.share_pct / 100]),
+  };
+  const mergedFig = chartFigure('by-assistant', 'Spend by assistant', 'Top assistants with every source merged (names match case-insensitively), stacked by source.', mergedTable, {
+    height: 340,
+    linkFor: (row, col) => (col === 0 && typeof row[0] === 'string' ? ctx.hrefFor({ name: 'assistant', assistant: row[0] }) : undefined),
+  });
+
+  ctx.root.append(tiles, h('div', { class: 'grid' }, weekly.figure, stacked.figure, mergedFig.figure, topFig.figure));
 
   const chartsReady = Promise.all([
     ctx.charts.line(weekly.canvas, {
@@ -121,7 +140,14 @@ export function render(ctx: ViewContext): ViewResult {
       },
       series: [{ label: 'Spend', data: topRows.map((c) => round2(c.cost_usd)), color: sourceColor(topRows[0]?.source ?? SOURCES[0]), colors: topRows.map((c) => sourceColor(c.source)) }],
     }),
+    ctx.charts.bar(mergedFig.canvas, {
+      labels: merged.map((a) => a.assistant),
+      horizontal: true,
+      stacked: true,
+      onClickLabel: (label) => ctx.navigate({ name: 'assistant', assistant: label }),
+      series: mergedSources.map((s) => ({ label: SOURCE_LABELS[s], data: merged.map((a) => round2(a.bySource[s])), color: sourceColor(s) })),
+    }),
   ]).then(() => undefined);
 
-  return { title, state: 'ready', tables: [weeklyTable, sourceTable, topTable], chartsReady };
+  return { title, state: 'ready', tables: [weeklyTable, sourceTable, mergedTable, topTable], chartsReady };
 }

@@ -1,4 +1,5 @@
 import { SOURCES, type Source, type UsageRecord } from '../../schema/usage';
+import { assistantKey, costByAssistantAcrossSources } from '../../allocation';
 import { SOURCE_LABELS, formatUsd } from '../../app/format';
 import { h } from '../dom';
 import { chartFigure } from '../charts';
@@ -9,18 +10,11 @@ import { renderTable, type DataTable } from '../table';
 import { emptyState, shortDate, sum, tile, viewHeader, weeksInWindow } from './common';
 import type { ViewContext, ViewResult } from './types';
 
-const key = (name: string): string => name.trim().toLowerCase();
+const key = assistantKey;
 
-/** Rank of every assistant by spend (names merged case-insensitively across sources). */
+/** Rank of every assistant by spend, via track A's allocation (names merged case-insensitively across sources). */
 export function assistantRanking(records: readonly UsageRecord[]): { name: string; cost: number }[] {
-  const map = new Map<string, { name: string; cost: number }>();
-  for (const r of records) {
-    const k = key(r.assistant_or_project);
-    const e = map.get(k);
-    if (e) e.cost += r.cost_usd;
-    else map.set(k, { name: r.assistant_or_project, cost: r.cost_usd });
-  }
-  return [...map.values()].sort((a, b) => b.cost - a.cost || a.name.localeCompare(b.name));
+  return costByAssistantAcrossSources(records).map((a) => ({ name: a.assistant, cost: a.total_cost_usd }));
 }
 
 export type UnitRow = { source: Source; unitType: string; units: number; cost: number; costPerUnit: number | null };

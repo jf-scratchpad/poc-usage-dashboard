@@ -14,8 +14,8 @@ concurrency:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,6 +23,8 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
       - name: Typecheck
         run: npm run typecheck
       - name: Enforce hard limits (no secrets, no hardware identifiers)
@@ -39,3 +41,14 @@ jobs:
         run: npm run check:bundle
       - name: Check documentation links
         run: npm run check:links
+      - name: Cache Playwright Chromium
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+      - name: End-to-end smoke tests
+        run: npm run test:e2e
+        env:
+          CI: true
