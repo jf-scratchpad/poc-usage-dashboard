@@ -1,14 +1,50 @@
 # Decisions
 
-Notable choices and why. One line each where possible.
+Every notable choice and why. Newest additions go at the bottom of their section.
 
-- **Stack: Node 20 LTS, TypeScript (strict), npm with a committed lockfile, Vite, Chart.js, Vitest.** The approved stack for this trial; no backend, no runtime network calls.
-- **`UsageAdapter.load()` is async (`Promise<UsageRecord[]>`).** Sample adapters could be sync, but real collectors (API exports, CSV downloads) are async, so the interface won't need to change when real data plugs in.
+## Stack and tooling
 
-- **Sample data is fictional, native-shaped, and covers 2026-08-31 through 2026-11-22 (12 weeks).** The trial forbids real account access; realistic export shapes let the adapters exercise real parsing. Weekday/weekend variation, a gentle upward trend, and three invented spikes (mid-September Azure OpenAI, mid-October coding push, mid-November pre-trial week) make weekly charts meaningful. IDs use the obviously fake placeholder `00000000-0000-0000-0000-000000000000`.
+- **Node 20 LTS, TypeScript (strict), npm with a committed `package-lock.json`, Vite, Chart.js, Vitest.** The approved stack for the trial. Reproducible installs (`npm ci`), one language end to end, fast static builds, and a small charting library with line and bar charts built in.
+- **No backend, no runtime network calls.** The data is sample-only and bundled at build time, so a static site is enough and there's nothing to secure or host.
+- **No ESLint.** Optional in the stack; skipped to save setup time on a one-day trial. `tsc --strict` (plus `noUncheckedIndexedAccess`) catches most of what matters here.
+- **Vite 6, Vitest 3, TypeScript 5.9, Chart.js 4.** Current major versions at the time, all supporting Node 20.
+- **`base: './'` in Vite.** The built `dist/` uses relative paths, so it works from any folder without a server path config. No deploy target is assumed.
+- **Box tooling ran Node 24 / npm 11; CI runs Node 20.** The lockfile (v3) is compatible with npm 10 on Node 20, and CI is the source of truth.
 - **Hand-rolled CSV parser (`src/adapters/csv.ts`) instead of a library.** Stays on the approved stack with no extra dependency. Understands quoted fields, comment lines, and a BOM so the fictional headers in the sample CSVs are skipped.
-- **Vite JSON import for Grok Bot; `?raw` imports for the Cursor and Azure CSVs.** The dashboard is a static site, so sample data is bundled at build time. There is no filesystem access and no network call at runtime.
+
+## Schema
+
+- **Fields: `date`, `source`, `assistant_or_project`, `units`, `unit_type`, `cost_usd`.** The minimum that supports per-week, per-assistant, and per-source views. `unit_type` was added to the brief's list because units differ by source (tokens vs. requests vs. messages) and summing them blindly would mislead.
+- **One record = one day × one source × one assistant/project.** Daily grain is what the source exports provide, and it rolls up cleanly to weeks.
+- **`date` is a plain `YYYY-MM-DD` string, validated as a real calendar day.** No time zones in the data; avoids `Date` parsing surprises.
+- **Cost in USD (`cost_usd`).** One currency makes totals and cross-source comparisons valid. The sample data is in USD; a real source billed in another currency (Azure can be) would convert in its adapter.
+- **`source` is a closed union (`'grok-bot' | 'cursor' | 'azure'`).** Typos fail fast; adding a source is a deliberate change (see README).
+- **Validation throws `UsageValidationError` naming the record index and field.** Bad sample or real data should stop the build or test run with a clear message instead of silently skewing charts. Zero units/cost are allowed (free days); negatives are not.
+- **`UsageAdapter.load()` is async (`Promise<UsageRecord[]>`).** Sample adapters could be sync, but real collectors (API exports, downloads) are async, so the interface won't need to change when real data plugs in.
+
+## Aggregation and views
+
+- **Week = ISO week starting Monday, computed in UTC.** A standard, locale-independent definition, so the same data gives the same weekly buckets for everyone.
+- **Four views: spend by week (trend lines), spend by assistant, top consumers, source filter.** Exactly the brief's list.
+- **Collectors did not add aggregation helpers.** Week / assistant / top-N / filter helpers belong with the charts. Adding a second copy here would only create a merge conflict with the web track.
+
+## Data and security
+
+- **Sample data only, clearly fake.** The trial forbids real account access; sample files are realistic in shape (they mimic each source's export format) so adapters exercise real parsing.
+- **Hard limits enforced in CI by a repo scanner (`scripts/limits.ts`, `tests/limits.test.ts`).** Catches private keys, common token formats, hard-coded credentials, MAC addresses, serial-number/hardware-UUID fields, and key/env files. Test fixtures are assembled at runtime so the test file doesn't trip itself.
+- **`package-lock.json` is not content-scanned.** It's generated and full of integrity hashes; it is still checked by file name like everything else.
+- **CI uses `permissions: contents: read` and pinned major versions of official actions (`actions/checkout@v4`, `actions/setup-node@v4`).** Least privilege; no secrets are used in CI at all.
+
+## Collectors
+
+- **Sample data covers 2026-08-31 through 2026-11-22 (12 weeks) with weekday/weekend variation, a gentle upward trend, and three invented spikes** (mid-September Azure OpenAI, mid-October coding push, mid-November pre-trial week). IDs use the obviously fake placeholder `00000000-0000-0000-0000-000000000000`.
+- **Vite JSON import for Grok Bot; `?raw` imports for the Cursor and Azure CSVs.** Sample data is bundled at build time. There is no filesystem access and no network call at runtime.
 - **Cursor events roll up to one record per day × project.** The native export is finer-grained (kind/model); the schema is one day × source × assistant/project.
 - **Azure line items roll up to one record per day × project tag (`unit_type` is `USD`).** Cost Management meters use incomparable units (hours, GB, tokens), so summing quantities would mislead. `units` equals the summed `PreTaxCost`. The project comes from `Tags.project`, falling back to `ResourceGroup`.
 - **Azure dates accept `YYYY-MM-DD` and `yyyyMMdd`; non-USD currency is rejected.** Some Cost Management Query API responses use compact `UsageDate` values. Currency conversion belongs at the real-data plug-in point, not in the static app.
-- **Aggregation helpers were left to the web track.** Week / assistant / top-N / filter helpers belong with the charts in `src/app/`. Adding a second copy in this track would only create a merge conflict.
+
+## Process
+
+- **Repo identity: Jose's own GitHub App `cody-grok-scratchpad`, not Cursor cloud agents.** The Cursor GitHub App isn't installed on the `jf-scratchpad` org, and Jose chose to use his own app for this trial. Work runs as three parallel local executors (collectors, web app, quality) on the box with short-lived installation tokens; the key never enters the repo.
+- **Initial scaffold pushed straight to `main`.** The repo was empty, so a base commit was needed before any branch or PR could exist. Everything after that goes through `grok/*` branches and PRs.
+- **Self-merge after green CI, merge commits only, no force pushes.** Jose's approved exception for this repo, today only, until 6 PM ET (work stops at 5:50 PM ET).

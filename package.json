@@ -12,7 +12,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check:limits": "vitest run tests/limits.test.ts"
   },
   "devDependencies": {
     "@types/node": "^20.17.0",
