@@ -11,6 +11,8 @@ Every notable choice and why. Newest additions go at the bottom of their section
 - **`base: './'` in Vite.** The built `dist/` uses relative paths, so it works from any folder without a server path config. No deploy target is assumed.
 - **Box tooling ran Node 24 / npm 11; CI runs Node 20.** The lockfile (v3) is compatible with npm 10 on Node 20, and CI is the source of truth.
 - **Hand-rolled CSV parser (`src/adapters/csv.ts`) instead of a library.** Stays on the approved stack with no extra dependency. Understands quoted fields, comment lines, and a BOM so the fictional headers in the sample CSVs are skipped.
+- **Vanilla TypeScript for the UI, no framework.** Preferred for this small static dashboard; keeps the bundle and CI surface small.
+- **happy-dom for DOM-level tests.** Lighter than launching a browser, and enough to assert the filter, table, tiles, and chart canvases once CanvasRenderingContext2D is stubbed for Chart.js.
 
 ## Schema
 
@@ -24,9 +26,13 @@ Every notable choice and why. Newest additions go at the bottom of their section
 
 ## Aggregation and views
 
-- **Week = ISO week starting Monday, computed in UTC.** A standard, locale-independent definition, so the same data gives the same weekly buckets for everyone.
-- **Four views: spend by week (trend lines), spend by assistant, top consumers, source filter.** Exactly the brief's list.
-- **Collectors did not add aggregation helpers.** Week / assistant / top-N / filter helpers belong with the charts. Adding a second copy here would only create a merge conflict with the web track.
+- **Week = ISO week starting Monday, computed from the calendar date (equivalent to UTC).** A standard, locale-independent definition, so the same data gives the same weekly buckets for everyone. The week-year follows the ISO Thursday rule.
+- **"This week" / "last week" tiles use today's date in America/New_York.** Record dates have no time zone, but the summary should follow Jose's local week rather than UTC.
+- **Four views: spend by week (one line per source plus a dashed total), spend by assistant, top consumers, source filter.** Exactly the brief's list.
+- **`src/aggregate.ts` is the canonical rollup module.** Collectors did not add a second copy; the web app's helpers are the ones to import.
+- **Units are summed even when `unit_type` differs, and the table labels that as "mixed units".** Cost is always USD and is the ranking key; mixed unit counts would otherwise look like a single quantity.
+- **The assistant bar chart caps at 15 rows; the top-consumers table caps at 10.** Keeps the layout readable when collectors later return long tails.
+- **The page renders an empty state when `loadAllUsage()` returns no records.** That path remains for an empty export; collectors now feed the charts from the bundled sample data.
 
 ## Data and security
 
