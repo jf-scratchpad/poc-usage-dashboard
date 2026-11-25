@@ -71,3 +71,4 @@ flowchart LR
 - **Load** (`src/data/load.ts`): the site fetches `./data/manifest.json` then the dataset it names, re-validates, and checks the record count. On any problem it falls back to the bundled adapters through a dynamic import, which also keeps ~440 kB of raw samples out of the initial chunk.
 - **Engines** (pure, documented in [analytics.md](analytics.md)): `src/budgets.ts` + `config/budgets.json` (burn, % used, run-rate projection, ok/warn/over).
 - `src/forecast.ts`: next 4 weeks of spend per source or total, linear (OLS + prediction interval) or EWMA, with a low/high band.
+- `src/anomaly.ts`: rolling z-score spike detection per total, source, or source × assistant.

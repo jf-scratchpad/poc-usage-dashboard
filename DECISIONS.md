@@ -71,6 +71,7 @@ Every notable choice and why. Newest additions go at the bottom of their section
 - **Source metadata split into `src/adapters/sources.ts`.** The UI imports labels/colors without importing the adapters (and their bundled samples).
 - **Budgets: straight-line run-rate projection, inclusive 80%/100% thresholds, assistant budgets matched case-insensitively across sources.** Simple and explainable; cross-source matching is what makes "Cody's total spend" possible. Config is JSON in `config/` so it's editable without code.
 - **Forecast: hand-written OLS + simple exponential smoothing, no stats library.** Both are a few lines, explainable in docs/analytics.md, and exactly testable against hand-computed series; a dependency would add weight without accuracy on 12 points.
+- **Anomalies: rolling z-score over the prior N weeks (current week excluded) with a σ floor and a minimum dollar delta.** Excluding the current week keeps a spike from inflating its own baseline; the floors stop near-constant or tiny series from flagging cents. Spikes only, since overspend is what matters for cost.
 
 ## v2 GitHub Pages (track C)
 
