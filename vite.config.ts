@@ -19,7 +19,7 @@ export default defineConfig({
       reporter: ['text', 'lcov'],
       include: ['src/**/*.ts', 'scripts/**/*.ts'],
       // Browser entry is exercised by end-to-end tests, not unit tests.
-      exclude: ['src/app/main.ts', 'scripts/run-*.ts', 'scripts/collect-run.ts'],
+      exclude: ['src/app/main.ts', 'src/ui/main.ts', 'scripts/run-*.ts', 'scripts/collect-run.ts'],
       thresholds: {
         lines: 88,
         statements: 88,

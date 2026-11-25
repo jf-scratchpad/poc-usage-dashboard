@@ -71,6 +71,7 @@ Every notable choice and why. Newest additions go at the bottom of their section
 - **Source metadata split into `src/adapters/sources.ts`.** The UI imports labels/colors without importing the adapters (and their bundled samples).
 - **Budgets: straight-line run-rate projection, inclusive 80%/100% thresholds, assistant budgets matched case-insensitively across sources.** Simple and explainable; cross-source matching is what makes "Cody's total spend" possible. Config is JSON in `config/` so it's editable without code.
 - **Forecast: hand-written OLS + simple exponential smoothing, no stats library.** Both are a few lines, explainable in docs/analytics.md, and exactly testable against hand-computed series; a dependency would add weight without accuracy on 12 points.
+- **Anomalies: rolling z-score over the prior N weeks (current week excluded) with a σ floor and a minimum dollar delta.** Excluding the current week keeps a spike from inflating its own baseline; the floors stop near-constant or tiny series from flagging cents. Spikes only, since overspend is what matters for cost.
 
 ## v2 GitHub Pages (track C)
 
@@ -81,9 +82,21 @@ Every notable choice and why. Newest additions go at the bottom of their section
 
 ## v2 quality gates (track C)
 
-- **`@vitest/coverage-v8` (official Vitest coverage provider).** Enforces a coverage floor in `npm test` (88% lines/statements/functions, 80% branches). `src/app/main.ts` is excluded because it is the browser bootstrap; end-to-end tests cover that path. Justified as the official provider for the already-approved Vitest runner; no second test framework.
-- **Bundle-size budget after `vite build`.** Caps the largest JS asset at 900 KiB (200 KiB gzip) and `dist/` at 2 MiB. That is a regression budget around today's ~635 KiB / ~109 KiB gzip bundle, with headroom for v2 UI before sample data is code-split. Implemented as a small `scripts/bundle-budget.ts` with no new dependency (`vite-node` already comes with Vite).
+- **`@vitest/coverage-v8` (official Vitest coverage provider).** Enforces a coverage floor in `npm test` (88% lines/statements/functions, 80% branches). Browser bootstraps (`src/app/main.ts`, `src/ui/main.ts`) are excluded because end-to-end tests cover those paths. Justified as the official provider for the already-approved Vitest runner; no second test framework.
+- **Bundle-size budget after `vite build`.** Caps the largest JS asset at 900 KiB (200 KiB gzip) and `dist/` at 2 MiB. That is a regression budget with headroom after the v2 code-split (initial chunk is much smaller; the adapters fallback chunk is the largest JS). Implemented as a small `scripts/bundle-budget.ts` with no new dependency (`vite-node` already comes with Vite).
 - **Markdown link checker** (`scripts/check-links.ts`, no new dependency). Relative links in README, DECISIONS, CONTRIBUTING, CHANGELOG, `docs/`, and `data/sample/` must resolve to files; `http(s)` links are syntax-checked only, not fetched, so CI does not depend on the live Pages URL or the network.
 - **`collect:check` is now a CI step.** Track A's collect pipeline already had the script; quality CI runs it so a stale `public/data/` dataset fails the build.
 - **Dependabot config only** (`.github/dependabot.yml`) for `npm` and `github-actions`, weekly, no auto-merge. Keeps actions and the lockfile from going stale without adding a bot identity or extra permissions.
 
+## UI v2 (track B)
+
+- **Own ~150-line hash router (`src/ui/router.ts`) instead of a framework or router library.** Hash routes (`#/assistant/Cody?range=4w`) work from any subpath, including GitHub Pages' `/usage-dashboard-trial/`, with no server rewrites and no new dependency.
+- **All global filters live in the URL query inside the hash, and defaults are omitted.** Every view is a shareable link; the back button undoes discrete filter changes, while assistant-search typing uses `replaceState` so it doesn't flood history.
+- **Default range is "All time"; presets 4w/12w are whole ISO weeks ending with the latest data week.** Week buckets and the chart axis line up, and the current partial week stays visible.
+- **Views and Chart.js load through dynamic `import()`; the bundled sample adapters are a fallback chunk.** The initial JS dropped from ~615 kB to ~27 kB; Chart.js (~177 kB) and the sample data (~424 kB) load only when needed (the sample only when `data/usage.v1.json` is missing, via track A's `loadUsageData`).
+- **Okabe–Ito color-blind-safe palette for charts, assigned by position in `SOURCES`, plus a distinct dash pattern and point shape per series.** Nothing depends on color alone, and new sources get a color automatically. Registry colors remain the source of truth for anything else.
+- **Every chart has its data as a `<table>` inside `<details>`, expanded when printing.** Screen-reader, keyboard, and print users get the same numbers, and export reuses those tables.
+- **CSV export = the view's primary table; JSON export = every table on the view plus the filters and URL.** CSV cells that start with `= + - @` get a leading `'` to prevent spreadsheet formula injection.
+- **Theme is `html[data-theme]`, toggled by a button and saved in `localStorage` (`ud-theme`); first visit follows the OS preference.** Charts re-render on toggle so axis and grid colors match.
+- **v1 `src/app/render.ts` / `charts.ts` stay in the tree (still tested) until v2 covers every view; `index.html` now boots `src/ui/main.ts`.**
+- **`tests/ui/bundle-boundaries.test.ts` fails if the UI entry point statically reaches Chart.js, an adapter (other than `sources.ts` metadata), sample data, or a view module.** Keeps the initial chunk small as tracks add modules.
