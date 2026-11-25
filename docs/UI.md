@@ -21,7 +21,7 @@ Vanilla TypeScript + Chart.js, no framework. Code lives in `src/ui/`; the entry 
 
 ## Views
 
-- **Overview** (`#/`): tiles, weekly spend + trend line, stacked spend by source, top 10 consumers (links to drill-down).
+- **Overview** (`#/`): tiles, weekly spend + trend line, stacked spend by source, spend by assistant with sources merged (track A's `costByAssistantAcrossSources`), top 10 consumers (links to drill-down).
 - **Assistant** (`#/assistant/<name>`): total, rank, share, sources, cost per unit; weekly spend by source (stacked) with a trend line; spend by source; units and cost per unit per source/unit type. Ignores the assistant search; names match case-insensitively.
 - **Source** (`#/source/<id>`): description from the registry, total, share of all spend, latest week, assistants, units; weekly spend + trend; assistants table with drill-down links. Ignores the source filter.
 - **Budgets** (`#/budgets`): one card per budget from `config/budgets.json` via `evaluateBudgets` (progress bar, status badge, projected end-of-period spend and status), summary tiles, table. Current period only; date range does not apply.
@@ -40,6 +40,8 @@ Vanilla TypeScript + Chart.js, no framework. Code lives in `src/ui/`; the entry 
 4. Add a happy-dom test under `tests/ui/` using `mountApp()` from `tests/ui/mount.ts`.
 
 ## Interaction and print
+
+- In the assistant search, **Enter** on an exact assistant name opens its drill-down (and clears the search); otherwise typing just filters every view.
 
 - Bars in "Top consumers" (overview) and "Assistants and projects" (source page) open the assistant drill-down on click; the same names are links in the data tables for keyboard and screen-reader users.
 - **Print** (toolbar button or Ctrl/Cmd+P) uses a light print stylesheet: filters, nav, and toolbar are hidden, panels avoid page breaks, and every chart's data table is expanded.
