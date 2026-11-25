@@ -6,7 +6,7 @@ A static web dashboard of AI usage and spend **per assistant** and **per week**,
 
 ## Viewing the site
 
-- **GitHub Pages** (no local install): [https://jf-scratchpad.github.io/usage-dashboard-trial/](https://jf-scratchpad.github.io/usage-dashboard-trial/). All numbers are fictional sample data. The published site is reachable by anyone with the link. If that URL 404s, Pages still needs a one-time enablement: Settings → Pages → Source: GitHub Actions.
+- **GitHub Pages** (no local install): [https://jf-scratchpad.github.io/usage-dashboard-trial/](https://jf-scratchpad.github.io/usage-dashboard-trial/). All numbers are fictional sample data. The published site is reachable by anyone with the link. Pages was enabled with Source: GitHub Actions on 2026-11-25.
 - **Locally:** `npm ci`, then `npm run dev` (hot reload) or `npm run build` && `npm run preview`. Opening `dist/index.html` as a file does not work (browsers block ES modules from `file://`).
 
 The Pages workflow (`.github/workflows/pages.yml`) builds with `VITE_BASE=/usage-dashboard-trial/` and deploys on every push to `main`. There is no custom domain and nothing else is deployed.
