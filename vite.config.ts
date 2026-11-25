@@ -14,5 +14,18 @@ export default defineConfig({
   test: {
     include: ['tests/**/*.test.ts', 'src/**/*.test.ts'],
     environment: 'node',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov'],
+      include: ['src/**/*.ts', 'scripts/**/*.ts'],
+      // Browser entry is exercised by end-to-end tests, not unit tests.
+      exclude: ['src/app/main.ts', 'scripts/run-*.ts'],
+      thresholds: {
+        lines: 88,
+        statements: 88,
+        functions: 88,
+        branches: 80,
+      },
+    },
   },
 });

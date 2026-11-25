@@ -27,9 +27,13 @@ jobs:
         run: npm run typecheck
       - name: Enforce hard limits (no secrets, no hardware identifiers)
         run: npm run check:limits
-      - name: Test
+      - name: Test with coverage thresholds
         run: npm test
       - name: Build
         run: npm run build
       - name: Check static build output
         run: test -f dist/index.html || { echo "dist/index.html is missing"; exit 1; }
+      - name: Bundle size budget
+        run: npm run check:bundle
+      - name: Check documentation links
+        run: npm run check:links
