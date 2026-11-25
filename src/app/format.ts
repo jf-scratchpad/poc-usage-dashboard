@@ -1,6 +1,6 @@
 import type { Source } from '../schema/usage';
 import { isoWeekEnd, parseDate } from '../aggregate';
-import { sourceColors, sourceLabels } from '../adapters/registry';
+import { sourceColors, sourceLabels } from '../adapters/source-meta';
 
 // Labels and colors come from the adapter registry so a new source shows up
 // in every chart and filter without editing the UI.
