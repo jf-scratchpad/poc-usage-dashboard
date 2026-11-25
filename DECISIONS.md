@@ -63,3 +63,9 @@ Every notable choice and why. Newest additions go at the bottom of their section
 
 - **Adapter registry with a typed metadata table (`Record<Source, SourceMeta>` + `satisfies`).** Adding a source to `SOURCES` makes typecheck fail until it has a label, unit, and color, so the UI can't silently miss it. UI label/color maps are derived from the registry.
 - **4th source is `llm-api`, a vendor-neutral "direct model API" source, not a named provider.** Proves the plugin path while staying vendor agnostic; sample is fictional (`model-large-sample`, `model-small-sample`). Units are input + output tokens.
+- **`npm run collect` runs through Vite's own SSR module loader (`scripts/collect.mjs`), not tsx.** Adapters use Vite `?raw`/JSON imports; reusing Vite (already a dependency) resolves them identically to the site build with no new dependency.
+- **Collected JSON lives in `public/data/` and is committed; a test regenerates it and fails if stale.** Keeps CI untouched (no workflow edit) while guaranteeing the shipped dataset matches the adapters. Run `npm run collect` after changing sample data.
+- **Deterministic manifest (`generated_at` = last data day, midnight UTC).** Byte-identical rebuilds; a wall-clock timestamp would make the staleness test flaky.
+- **Dedupe on day × source × assistant × unit type; exact duplicates (within 5e-7) dropped and counted, conflicting ones are errors.** Silent last-wins would hide double-exported or mismatched rows.
+- **The site fetches its own static `./data/*.json` (same origin, relative URL) with a bundled fallback.** This is not an external network call: no third-party host, credential, or API. Fallback via dynamic import keeps the initial JS chunk ~195 kB instead of ~640 kB.
+- **Source metadata split into `src/adapters/sources.ts`.** The UI imports labels/colors without importing the adapters (and their bundled samples).

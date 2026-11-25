@@ -42,3 +42,30 @@ flowchart LR
 - **CI** (`.github/workflows/ci.yml`, GitHub Actions, `permissions: contents: read`): `npm ci` → typecheck → hard-limits scan → tests → build → assert `dist/index.html` exists. Runs on pull requests and pushes to `main`.
 - **Tests** (Vitest): schema validation, each adapter against its sample, aggregation, a DOM-level render test of the dashboard (happy-dom), and the limits scanner.
 - **Limits scanner** (`scripts/limits.ts`): secrets and hardware-identifier patterns, run as part of `npm test` and as a separate named CI step.
+
+## v2 data platform (track A)
+
+```mermaid
+flowchart LR
+  subgraph samples["data/sample/ (fictional)"]
+    G[grok-bot] 
+    C[cursor]
+    A[azure]
+    L[llm-api]
+  end
+  REG["src/adapters/registry.ts<br/>adapters + sources.ts metadata"]
+  PIPE["src/data/pipeline.ts<br/>validate all rows · dedupe · sort"]
+  OUT[("public/data/<br/>usage.v1.json + manifest.json")]
+  LOAD["src/data/load.ts<br/>loadUsageData()"]
+  ENG["pure engines<br/>aggregate · budgets · forecast · anomaly · allocation"]
+  UI[UI views]
+  G & C & A & L --> REG
+  REG -- "npm run collect (build time)" --> PIPE --> OUT
+  OUT -- "fetch ./data/* (same origin)" --> LOAD
+  REG -. "fallback: dynamic import, bundled" .-> LOAD
+  LOAD --> ENG --> UI
+```
+
+- **Registry** (`src/adapters/registry.ts`, metadata in `sources.ts`): every source's display name, unit type, color, and adapter. See docs/adapters.md, "Adding a source".
+- **Collect** (`npm run collect` → `scripts/collect.mjs` → `scripts/collect-run.ts`): runs every registered adapter through `normalizeBatches()`, which validates every row (all errors reported at once, with source, index, and a row snippet), drops exact duplicates on the natural key day × source × assistant × unit type, and fails on conflicting duplicates. Writes a versioned dataset and a manifest (counts, date range, per-source totals, schema version). `generated_at` is derived from the last data day, so output is byte-identical across runs; a test fails if the committed files are stale.
+- **Load** (`src/data/load.ts`): the site fetches `./data/manifest.json` then the dataset it names, re-validates, and checks the record count. On any problem it falls back to the bundled adapters through a dynamic import, which also keeps ~440 kB of raw samples out of the initial chunk.
