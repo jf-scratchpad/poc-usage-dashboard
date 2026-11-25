@@ -72,6 +72,7 @@ Every notable choice and why. Newest additions go at the bottom of their section
 - **Budgets: straight-line run-rate projection, inclusive 80%/100% thresholds, assistant budgets matched case-insensitively across sources.** Simple and explainable; cross-source matching is what makes "Cody's total spend" possible. Config is JSON in `config/` so it's editable without code.
 - **Forecast: hand-written OLS + simple exponential smoothing, no stats library.** Both are a few lines, explainable in docs/analytics.md, and exactly testable against hand-computed series; a dependency would add weight without accuracy on 12 points.
 - **Anomalies: rolling z-score over the prior N weeks (current week excluded) with a σ floor and a minimum dollar delta.** Excluding the current week keeps a spike from inflating its own baseline; the floors stop near-constant or tiny series from flagging cents. Spikes only, since overspend is what matters for cost.
+- **Allocation merges assistant/project names case-insensitively across sources; unit economics never mixes unit types.** Gives the per-assistant cross-source view with no alias config for fictional data; mixing requests/tokens/USD would make cost per unit meaningless.
 
 ## v2 GitHub Pages (track C)
 
@@ -79,6 +80,14 @@ Every notable choice and why. Newest additions go at the bottom of their section
 - **Vite `base` stays `'./'` locally and in CI; the Pages workflow sets `VITE_BASE=/usage-dashboard-trial/`.** Relative paths keep `vite preview` working; the absolute project path is what GitHub Pages needs at `https://jf-scratchpad.github.io/usage-dashboard-trial/`.
 - **`.github/workflows/pages.yml` uses official actions** (`actions/configure-pages@v6`, `actions/upload-pages-artifact@v5`, `actions/deploy-pages@v5`) on `push` to `main` and `workflow_dispatch`. Checkout and setup-node stay at `@v4`, same as CI. `pages: write` and `id-token: write` are granted only on the deploy job; the build job also has `pages: write` because `upload-pages-artifact` requires it. Workflow-level permissions stay `contents: read`.
 - **Creating the Pages site via `POST /pages` also requires `administration:write`.** The app has `pages: write` (GET returns 404 until a site exists) but not Administration, so enablement is a one-time Settings → Pages → Source: GitHub Actions click (or a later grant of Administration). The workflow does not set `enablement: true`, which would fail for the same reason. Repo visibility will not be changed if the org plan does not support private Pages.
+
+## v2 quality gates (track C)
+
+- **`@vitest/coverage-v8` (official Vitest coverage provider).** Enforces a coverage floor in `npm test` (88% lines/statements/functions, 80% branches). Browser bootstraps (`src/app/main.ts`, `src/ui/main.ts`) are excluded because end-to-end tests cover those paths. Justified as the official provider for the already-approved Vitest runner; no second test framework.
+- **Bundle-size budget after `vite build`.** Caps the largest JS asset at 900 KiB (200 KiB gzip) and `dist/` at 2 MiB. That is a regression budget with headroom after the v2 code-split (initial chunk is much smaller; the adapters fallback chunk is the largest JS). Implemented as a small `scripts/bundle-budget.ts` with no new dependency (`vite-node` already comes with Vite).
+- **Markdown link checker** (`scripts/check-links.ts`, no new dependency). Relative links in README, DECISIONS, CONTRIBUTING, CHANGELOG, `docs/`, and `data/sample/` must resolve to files; `http(s)` links are syntax-checked only, not fetched, so CI does not depend on the live Pages URL or the network.
+- **`collect:check` is now a CI step.** Track A's collect pipeline already had the script; quality CI runs it so a stale `public/data/` dataset fails the build.
+- **Dependabot config only** (`.github/dependabot.yml`) for `npm` and `github-actions`, weekly, no auto-merge. Keeps actions and the lockfile from going stale without adding a bot identity or extra permissions.
 
 ## UI v2 (track B)
 
