@@ -1,7 +1,7 @@
 /**
- * Source display metadata (labels, unit types, colors), kept separate from the
- * adapters so the UI can import it without pulling the bundled sample data
- * into the initial JS chunk. `registry.ts` re-exports everything here.
+ * Source metadata (display name, unit type, color). Kept separate from the
+ * adapter registry so the UI can import labels and colors without pulling the
+ * bundled sample data into its initial chunk. Re-exported by registry.ts.
  */
 import { SOURCES, type Source } from '../schema/usage';
 
@@ -89,3 +89,4 @@ export function checkRegistry(): string[] {
   }
   return problems;
 }
+

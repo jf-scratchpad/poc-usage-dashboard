@@ -37,8 +37,8 @@ describe('initial bundle boundaries', () => {
     expect(graph.filter((f) => f.startsWith('pkg:chart.js'))).toEqual([]);
   });
 
-  it('does not statically import sample data or adapters (only source metadata)', () => {
-    const adapters = graph.filter((f) => f.includes('/src/adapters/') && !f.endsWith('/source-meta.ts'));
+  it('does not statically import sample data or adapters (only source metadata in sources.ts)', () => {
+    const adapters = graph.filter((f) => f.includes('/src/adapters/') && !f.endsWith('/sources.ts'));
     expect(adapters).toEqual([]);
     expect(graph.filter((f) => f.includes('/data/sample/'))).toEqual([]);
   });

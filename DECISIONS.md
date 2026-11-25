@@ -63,6 +63,12 @@ Every notable choice and why. Newest additions go at the bottom of their section
 
 - **Adapter registry with a typed metadata table (`Record<Source, SourceMeta>` + `satisfies`).** Adding a source to `SOURCES` makes typecheck fail until it has a label, unit, and color, so the UI can't silently miss it. UI label/color maps are derived from the registry.
 - **4th source is `llm-api`, a vendor-neutral "direct model API" source, not a named provider.** Proves the plugin path while staying vendor agnostic; sample is fictional (`model-large-sample`, `model-small-sample`). Units are input + output tokens.
+- **`npm run collect` runs through Vite's own SSR module loader (`scripts/collect.mjs`), not tsx.** Adapters use Vite `?raw`/JSON imports; reusing Vite (already a dependency) resolves them identically to the site build with no new dependency.
+- **Collected JSON lives in `public/data/` and is committed; a test regenerates it and fails if stale.** Keeps CI untouched (no workflow edit) while guaranteeing the shipped dataset matches the adapters. Run `npm run collect` after changing sample data.
+- **Deterministic manifest (`generated_at` = last data day, midnight UTC).** Byte-identical rebuilds; a wall-clock timestamp would make the staleness test flaky.
+- **Dedupe on day × source × assistant × unit type; exact duplicates (within 5e-7) dropped and counted, conflicting ones are errors.** Silent last-wins would hide double-exported or mismatched rows.
+- **The site fetches its own static `./data/*.json` (same origin, relative URL) with a bundled fallback.** This is not an external network call: no third-party host, credential, or API. Fallback via dynamic import keeps the initial JS chunk ~195 kB instead of ~640 kB.
+- **Source metadata split into `src/adapters/sources.ts`.** The UI imports labels/colors without importing the adapters (and their bundled samples).
 
 ## v2 GitHub Pages (track C)
 
@@ -76,10 +82,10 @@ Every notable choice and why. Newest additions go at the bottom of their section
 - **Own ~150-line hash router (`src/ui/router.ts`) instead of a framework or router library.** Hash routes (`#/assistant/Cody?range=4w`) work from any subpath, including GitHub Pages' `/usage-dashboard-trial/`, with no server rewrites and no new dependency.
 - **All global filters live in the URL query inside the hash, and defaults are omitted.** Every view is a shareable link; the back button undoes discrete filter changes, while assistant-search typing uses `replaceState` so it doesn't flood history.
 - **Default range is "All time"; presets 4w/12w are whole ISO weeks ending with the latest data week.** Week buckets and the chart axis line up, and the current partial week stays visible.
-- **Views and Chart.js load through dynamic `import()`; the bundled sample adapters are a fallback chunk.** The initial JS dropped from ~615 kB to ~27 kB; Chart.js (~177 kB) and the sample data (~424 kB) load only when needed (the sample only when `data/usage.v1.json` is missing).
+- **Views and Chart.js load through dynamic `import()`; the bundled sample adapters are a fallback chunk.** The initial JS dropped from ~615 kB to ~27 kB; Chart.js (~177 kB) and the sample data (~424 kB) load only when needed (the sample only when `data/usage.v1.json` is missing, via track A's `loadUsageData`).
 - **Okabe–Ito color-blind-safe palette for charts, assigned by position in `SOURCES`, plus a distinct dash pattern and point shape per series.** Nothing depends on color alone, and new sources get a color automatically. Registry colors remain the source of truth for anything else.
 - **Every chart has its data as a `<table>` inside `<details>`, expanded when printing.** Screen-reader, keyboard, and print users get the same numbers, and export reuses those tables.
 - **CSV export = the view's primary table; JSON export = every table on the view plus the filters and URL.** CSV cells that start with `= + - @` get a leading `'` to prevent spreadsheet formula injection.
 - **Theme is `html[data-theme]`, toggled by a button and saved in `localStorage` (`ud-theme`); first visit follows the OS preference.** Charts re-render on toggle so axis and grid colors match.
 - **v1 `src/app/render.ts` / `charts.ts` stay in the tree (still tested) until v2 covers every view; `index.html` now boots `src/ui/main.ts`.**
-- **Source display metadata moved to `src/adapters/source-meta.ts` (re-exported unchanged by `registry.ts`).** `format.ts` imported the registry, which statically imports every adapter and its raw sample file, pulling ~440 kB into the initial chunk. `tests/ui/bundle-boundaries.test.ts` now fails if the entry point statically reaches Chart.js, the adapters, or a view module.
+- **`tests/ui/bundle-boundaries.test.ts` fails if the UI entry point statically reaches Chart.js, an adapter (other than `sources.ts` metadata), sample data, or a view module.** Keeps the initial chunk small as tracks add modules.

@@ -9,7 +9,7 @@ Vanilla TypeScript + Chart.js, no framework. Code lives in `src/ui/`; the entry 
 | `shell.ts` | Header (title, data freshness, theme toggle), nav, filter bar, export toolbar, `<main id="view">`, loading / error states. |
 | `router.ts` | Hash router: `#/<view>[/<param>]?<filters>`. `parseHash`, `formatHash`, `HashRouter`. |
 | `filters.ts` | `Filters` type, URL (de)serialization, `dateWindow`, `applyFilters`. Pure functions. |
-| `data.ts` | Loads `./data/manifest.json` + `./data/usage.v1.json` (relative, same origin) or falls back to the bundled sample adapters. Stand-in for track A's `src/data/load.ts`. |
+| `data.ts` | Wraps track A's `loadUsageData` (`./data/manifest.json` + `./data/usage.v1.json`, relative, same origin; bundled sample fallback) and derives `asOf`, `earliest`, `dataThrough`. |
 | `charts.ts` / `chartkit.ts` | `ChartHost` creates and destroys charts; `chartkit` (Chart.js) is dynamic-imported. `chartFigure` builds a panel with canvas + data table. |
 | `table.ts`, `export.ts` | Data tables, CSV / JSON export. |
 | `palette.ts`, `theme.ts`, `stats.ts`, `dom.ts` | Okabe–Ito palette, theme persistence, trend line, safe DOM builders. |

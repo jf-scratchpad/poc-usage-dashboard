@@ -7,26 +7,16 @@
  *
  * How to add a source (full checklist in docs/adapters.md, "Adding a source"):
  *   1. Append the id to SOURCES in src/schema/usage.ts.
- *   2. Describe it in SOURCE_META below (typecheck fails until you do).
+ *   2. Describe it in SOURCE_META in ./sources.ts (typecheck fails until you do).
  *   3. Write src/adapters/<id>.ts with a parser + a `// REAL DATA PLUGS IN HERE` block.
  *   4. Add the adapter to BUILTIN_ADAPTERS below, add sample data and tests.
  */
 import { SOURCES, type Source, type UsageAdapter } from '../schema/usage';
+export * from './sources';
 import { azureAdapter } from './azure';
 import { cursorAdapter } from './cursor';
 import { grokBotAdapter } from './grok-bot';
 import { llmApiAdapter } from './llm-api';
-
-export type { SourceMeta } from './source-meta';
-export {
-  checkRegistry,
-  getSourceMeta,
-  listSourceMeta,
-  sourceColor,
-  sourceColors,
-  sourceLabel,
-  sourceLabels,
-} from './source-meta';
 
 const BUILTIN_ADAPTERS: readonly UsageAdapter[] = [grokBotAdapter, cursorAdapter, azureAdapter, llmApiAdapter];
 

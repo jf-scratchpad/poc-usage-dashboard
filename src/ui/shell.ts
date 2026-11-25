@@ -276,7 +276,7 @@ export class AppShell {
       el.min = data.earliest;
       el.max = data.asOf;
     }
-    const through = data.manifest?.date_range?.to ?? data.asOf;
+    const through = data.dataThrough;
     const origin = data.origin === 'json' ? 'static JSON' : 'bundled sample';
     this.freshness.textContent = `Data through ${longDate(through)} · ${data.records.length.toLocaleString('en-US')} records · ${origin}`;
     this.freshness.dataset.through = through;
