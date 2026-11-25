@@ -39,7 +39,7 @@ flowchart LR
 
 ## Quality gates
 
-- **CI** (`.github/workflows/ci.yml`, GitHub Actions, `permissions: contents: read`): `npm ci` → typecheck → hard-limits scan → tests → build → assert `dist/index.html` exists. Runs on pull requests and pushes to `main`.
+- **CI** (`.github/workflows/ci.yml`, GitHub Actions, `permissions: contents: read`): `npm ci` → typecheck → hard-limits scan → tests with coverage thresholds → build → assert `dist/index.html` exists → bundle-size budget → documentation link check. Runs on pull requests and pushes to `main`. Dependabot is configured (config file only) for npm and GitHub Actions.
 - **Tests** (Vitest): schema validation, each adapter against its sample, aggregation, a DOM-level render test of the dashboard (happy-dom), and the limits scanner.
 - **Limits scanner** (`scripts/limits.ts`): secrets and hardware-identifier patterns, run as part of `npm test` and as a separate named CI step.
 

@@ -1,0 +1,14 @@
+# Config file only: weekly PRs for npm and GitHub Actions.
+# No secrets, no auto-merge, no extra permissions.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
