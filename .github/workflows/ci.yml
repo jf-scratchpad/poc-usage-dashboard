@@ -25,6 +25,8 @@ jobs:
       - run: npm ci
       - name: Typecheck
         run: npm run typecheck
+      - name: Enforce hard limits (no secrets, no hardware identifiers)
+        run: npm run check:limits
       - name: Test
         run: npm test
       - name: Build
