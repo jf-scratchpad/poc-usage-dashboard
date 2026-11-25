@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "disclaimer": "FICTIONAL SAMPLE BUDGETS for the usage-dashboard v2 sample data. Not real limits.",
+  "thresholds": { "warn_pct": 80, "over_pct": 100 },
+  "budgets": [
+    { "id": "total-month", "scope": "total", "period": "month", "amount_usd": 2400, "label": "All AI spend (monthly)" },
+    { "id": "total-week", "scope": "total", "period": "week", "amount_usd": 650, "label": "All AI spend (weekly)" },
+    { "id": "azure-month", "scope": "source", "key": "azure", "period": "month", "amount_usd": 1000 },
+    { "id": "cursor-month", "scope": "source", "key": "cursor", "period": "month", "amount_usd": 450 },
+    { "id": "grok-bot-month", "scope": "source", "key": "grok-bot", "period": "month", "amount_usd": 500 },
+    { "id": "llm-api-month", "scope": "source", "key": "llm-api", "period": "month", "amount_usd": 300 },
+    { "id": "llm-api-week", "scope": "source", "key": "llm-api", "period": "week", "amount_usd": 120 },
+    { "id": "cody-month", "scope": "assistant", "key": "Cody", "period": "month", "amount_usd": 350, "label": "Cody, all sources (monthly)" },
+    { "id": "ai-core-month", "scope": "assistant", "key": "ai-core", "period": "month", "amount_usd": 1000, "label": "ai-core project, all sources (monthly)" },
+    { "id": "rocky-week", "scope": "assistant", "key": "Rocky", "period": "week", "amount_usd": 30 }
+  ]
+}
