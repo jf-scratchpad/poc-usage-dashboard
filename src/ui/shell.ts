@@ -31,9 +31,9 @@ export const VIEW_LOADERS: ViewLoaders = {
   overview: () => import('./views/overview'),
   assistant: () => import('./views/assistant'),
   source: () => import('./views/source'),
-  budgets: () => import('./views/placeholder'),
-  forecast: () => import('./views/placeholder'),
-  anomalies: () => import('./views/placeholder'),
+  budgets: () => import('./views/budgets'),
+  forecast: () => import('./views/forecast'),
+  anomalies: () => import('./views/anomalies'),
   notfound: () => import('./views/notfound'),
 };
 
