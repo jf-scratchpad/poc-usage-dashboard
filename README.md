@@ -1,21 +1,89 @@
 # usage-dashboard-trial
 
-A static web dashboard of AI usage and spend per assistant and per week, across Grok Bot, Cursor, and Azure. **Sample data only**: no real accounts, credentials, or network calls.
+A static web dashboard of AI usage and spend **per assistant** and **per week**, with trend lines, across three sources: **Grok Bot**, **Cursor**, and **Azure Cost Management**.
 
-Trial repo (Wed Nov 25, 2026). Nothing else depends on it. Full docs are coming in the quality track.
+> **Sample data only.** No real accounts, credentials, tokens, or runtime network calls. Nothing is deployed. This is a one-day trial repo (CD-4, Wed Nov 25, 2026), and nothing else depends on it.
+
+## What you get
+
+- **Spend by week**: a weekly trend line (ISO weeks, Monday start), per source plus a total.
+- **Spend by assistant**: total cost per assistant or project.
+- **Top consumers**: the highest-cost assistants/projects, with cost and units.
+- **Source filter**: show Grok Bot, Cursor, Azure, or any mix.
+- **Empty state**: until collectors are wired into `loadAllUsage()`, the page still renders and explains that no records have loaded.
+
+## Quick start
+
+Requires Node 20 LTS (or newer) and npm.
 
 ```bash
-npm ci
-npm test
-npm run build   # static files in dist/
+npm ci            # install exact versions from package-lock.json
+npm run dev       # local dev server with hot reload
+npm run build     # static site in dist/
+npm run preview   # serve dist/ locally to check the build
 ```
 
-## Dashboard
+Open `dist/index.html` through `npm run preview` (browsers block ES modules from `file://`).
 
-The static site loads records from `loadAllUsage()` and draws spend by week, spend by assistant or project, and the top consumers, with a source filter. Until collectors are wired in, the page shows an empty state. All figures are sample data.
+## Scripts
 
-```bash
-npm run dev        # local preview
-npm run preview    # serve the production build in dist/
+| Script | What it does |
+| --- | --- |
+| `npm run dev` | Vite dev server |
+| `npm run build` | Static build to `dist/` |
+| `npm run preview` | Serve the built `dist/` locally |
+| `npm test` | All Vitest tests (schema, adapters, aggregation, limits) |
+| `npm run typecheck` | `tsc --noEmit` with strict TypeScript |
+| `npm run check:limits` | Scan the repo for secrets, hardware identifiers, and key files |
+
+CI (`.github/workflows/ci.yml`) runs `npm ci`, typecheck, the limits check, tests, the build, and confirms `dist/index.html` exists, on every pull request and every push to `main`.
+
+## Data flow
+
+```
+data/sample/<source>.*   ->  src/adapters/<source>.ts  ->  validateRecords()  ->  loadAllUsage()  ->  src/aggregate.ts + src/app (charts)
+ (raw, source-shaped)        (parse + map to schema)       (src/schema/usage.ts)  (src/adapters/index.ts)   (Chart.js, static)
 ```
 
+Every adapter turns its source's raw format into the common `UsageRecord`:
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `date` | `string` | Calendar day, `YYYY-MM-DD` |
+| `source` | `'grok-bot' \| 'cursor' \| 'azure'` | Which collector produced it |
+| `assistant_or_project` | `string` | Assistant, model, or Azure project/resource group |
+| `units` | `number` (≥ 0) | Quantity used |
+| `unit_type` | `string` | What `units` counts (tokens, requests, messages…) |
+| `cost_usd` | `number` (≥ 0) | Cost in US dollars |
+
+`validateRecord` / `validateRecords` throw a `UsageValidationError` naming the bad record and field (bad date, negative cost or units, unknown source, empty name).
+
+## Where real data would plug in
+
+Each adapter implements `UsageAdapter { source; load(): Promise<UsageRecord[]> }`. Today `load()` reads a bundled sample file. To go live, replace only the read step inside `load()`; the mapping, validation, and app stay the same. Never commit credentials; a real collector would run outside this static site (for example a scheduled export job) and write a file in the same shape as the sample.
+
+| Source | Adapter | Sample file | Real data would come from |
+| --- | --- | --- | --- |
+| Grok Bot | `src/adapters/grok-bot.ts` | `data/sample/grok-bot.*` | Grok Bot plan usage export (per-bot / per-routine usage) |
+| Cursor | `src/adapters/cursor.ts` | `data/sample/cursor.*` | Cursor dashboard usage export (team/admin usage CSV) |
+| Azure | `src/adapters/azure.ts` | `data/sample/azure.*` | Azure Cost Management export or Cost Details API (daily, by resource group/meter) |
+
+Each adapter file marks the exact plug-in spot with a `REAL DATA` comment.
+
+## Adding a source
+
+1. Add the id to `SOURCES` in `src/schema/usage.ts`.
+2. Add a raw sample file at `data/sample/<source>.*` (fake data only).
+3. Write `src/adapters/<source>.ts` implementing `UsageAdapter`, mapping raw rows to `UsageRecord` and calling `validateRecords`.
+4. Register it in `src/adapters/index.ts` so `loadAllUsage()` includes it.
+5. Add `tests/adapters/<source>.test.ts` (parses the sample, validates, maps fields, rejects bad rows).
+6. Note anything unusual in `DECISIONS.md`.
+
+## Hard limits (enforced in CI)
+
+`tests/limits.test.ts` (logic in `scripts/limits.ts`) fails the build on private key blocks, common token formats (GitHub, Slack, AWS, `sk-` keys, JWTs, Azure storage keys), hard-coded credentials, MAC addresses, serial-number / hardware-UUID fields, and committed `.env`, `.pem`, or key files.
+
+## More
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): how the pieces fit.
+- [DECISIONS.md](DECISIONS.md): every notable choice and why.
