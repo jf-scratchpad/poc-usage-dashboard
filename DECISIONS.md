@@ -109,3 +109,9 @@ Every notable choice and why. Newest additions go at the bottom of their section
 - **Budgets view evaluates the current week/month as of the latest data day and ignores the date-range filter.** Budgets are absolute limits for a period, so a custom range would make "spent" meaningless. The source filter hides source budgets for unchecked sources and the assistant search narrows assistant budgets; "All AI spend" budgets always show. Status is text + icon + color, and each bar is an ARIA `progressbar` with the projected end-of-period value as a marker.
 - **Forecast view uses track A's linear forecast with its 95% band, and shows the EWMA total alongside for comparison** instead of a method switch, so the URL and export stay deterministic. Fewer than 3 complete weeks of history shows a "widen the range" empty state.
 - **Anomalies view combines total, source, and assistant anomalies from track A's rolling z-score, newest first, each with its explanation and a drill-down link;** flagged weeks are marked with triangles on the weekly line (shape, not just color).
+
+## v2 docs (track C)
+
+- **CHANGELOG records 1.0.0 (morning trial) and 2.0.0 (this follow-on) but no git tags or GitHub Releases are created.** Jose did not ask for a release; the file is just the human history of what shipped. `package.json` version is left as-is so a version bump is an explicit later choice.
+- **README is the v2 entry point** (routes, how to run, how to add a source, how budgets/forecast work, the Pages URL). Deeper detail stays in `docs/UI.md`, `docs/adapters.md`, and `docs/analytics.md` rather than being copied into the README.
+- **CONTRIBUTING.md** describes branch names, the merge-commit rule, CI, and the hard limits, so a later session does not have to reconstruct them from chat.
