@@ -41,11 +41,12 @@ The Pages workflow (`.github/workflows/pages.yml`) builds with `VITE_BASE=/usage
 | `npm run preview` | Serve the built `dist/` locally |
 | `npm test` | All Vitest tests (schema, adapters, aggregation, limits, workflow) with coverage thresholds |
 | `npm run typecheck` | `tsc --noEmit` with strict TypeScript |
+| `npm run collect` | Validate + dedupe every adapter, write `public/data/usage.v1.json` and `manifest.json` (`collect:check` fails if they are stale) |
 | `npm run check:limits` | Scan the repo for secrets, hardware identifiers, and key files |
 | `npm run check:bundle` | Fail if the `dist/` bundle exceeds the size budget |
 | `npm run check:links` | Check documentation links in README, docs, and decision/changelog files |
 
-CI (`.github/workflows/ci.yml`) runs `npm ci`, typecheck, the limits check, tests with coverage thresholds, the build, a bundle-size budget check, and a documentation link check, and confirms `dist/index.html` exists, on every pull request and every push to `main`. The limits scanner still runs as its own named step and as part of `npm test`.
+CI (`.github/workflows/ci.yml`) runs `npm ci`, typecheck, the limits check, `collect:check`, tests with coverage thresholds, the build, a bundle-size budget check, and a documentation link check, and confirms `dist/index.html` exists, on every pull request and every push to `main`. The limits scanner still runs as its own named step and as part of `npm test`.
 
 ## Data flow
 

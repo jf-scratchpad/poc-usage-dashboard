@@ -27,6 +27,8 @@ jobs:
         run: npm run typecheck
       - name: Enforce hard limits (no secrets, no hardware identifiers)
         run: npm run check:limits
+      - name: Check collected sample dataset is up to date
+        run: npm run collect:check
       - name: Test with coverage thresholds
         run: npm test
       - name: Build

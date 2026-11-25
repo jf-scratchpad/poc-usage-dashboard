@@ -1,0 +1,54 @@
+{
+  "schema": "usage.v1",
+  "schema_version": 1,
+  "generated_at": "2026-11-22T00:00:00Z",
+  "data_file": "usage.v1.json",
+  "data_through": "2026-11-22",
+  "period_start": "2026-08-31",
+  "period_end": "2026-11-22",
+  "record_count": 1430,
+  "total_cost_usd": 6050.3552,
+  "duplicates_removed": 0,
+  "sources": [
+    {
+      "id": "grok-bot",
+      "label": "Grok Bot",
+      "record_count": 437,
+      "cost_usd": 998.5158,
+      "units": 20667,
+      "unit_type": "requests",
+      "first_date": "2026-08-31",
+      "last_date": "2026-11-22"
+    },
+    {
+      "id": "cursor",
+      "label": "Cursor",
+      "record_count": 278,
+      "cost_usd": 930.7569,
+      "units": 12792,
+      "unit_type": "requests",
+      "first_date": "2026-08-31",
+      "last_date": "2026-11-22"
+    },
+    {
+      "id": "azure",
+      "label": "Azure",
+      "record_count": 403,
+      "cost_usd": 3298.306,
+      "units": 3298.306,
+      "unit_type": "USD",
+      "first_date": "2026-08-31",
+      "last_date": "2026-11-22"
+    },
+    {
+      "id": "llm-api",
+      "label": "LLM API",
+      "record_count": 312,
+      "cost_usd": 822.7765,
+      "units": 246882309,
+      "unit_type": "tokens",
+      "first_date": "2026-08-31",
+      "last_date": "2026-11-22"
+    }
+  ]
+}
