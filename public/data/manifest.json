@@ -50,5 +50,25 @@
       "first_date": "2026-08-31",
       "last_date": "2026-11-22"
     }
-  ]
+  ],
+  "quality": {
+    "coverage_pct": {
+      "grok-bot": 100,
+      "cursor": 95.24,
+      "azure": 100,
+      "llm-api": 100
+    },
+    "gap_days": {
+      "grok-bot": 0,
+      "cursor": 4,
+      "azure": 0,
+      "llm-api": 0
+    },
+    "warnings": [
+      "cursor: no data 2026-09-26..2026-09-26 (1 day)",
+      "cursor: no data 2026-10-11..2026-10-11 (1 day)",
+      "cursor: no data 2026-10-24..2026-10-24 (1 day)",
+      "cursor: no data 2026-11-14..2026-11-14 (1 day)"
+    ]
+  }
 }

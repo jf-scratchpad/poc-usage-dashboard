@@ -73,6 +73,8 @@ Every notable choice and why. Newest additions go at the bottom of their section
 - **Forecast: hand-written OLS + simple exponential smoothing, no stats library.** Both are a few lines, explainable in docs/analytics.md, and exactly testable against hand-computed series; a dependency would add weight without accuracy on 12 points.
 - **Anomalies: rolling z-score over the prior N weeks (current week excluded) with a σ floor and a minimum dollar delta.** Excluding the current week keeps a spike from inflating its own baseline; the floors stop near-constant or tiny series from flagging cents. Spikes only, since overspend is what matters for cost.
 - **Allocation merges assistant/project names case-insensitively across sources; unit economics never mixes unit types.** Gives the per-assistant cross-source view with no alias config for fictional data; mixing requests/tokens/USD would make cost per unit meaningless.
+- **Manifest carries a data-quality block (coverage and gap days per source); gaps are warnings, not failures.** A missing export day otherwise reads as $0 spend; failing the build on a weekend with no usage would be wrong.
+- **`buildInsights()` composes the engines in one pure call.** Gives the UI one tested entry point for an overview panel instead of re-wiring five modules.
 
 ## v2 GitHub Pages (track C)
 

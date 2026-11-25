@@ -86,3 +86,20 @@ API: `detectAnomalies(records, { scope, window, threshold, minHistory, minDeltaU
 Merging by name is a convention: it assumes the same name means the same
 assistant or project in every source. A real deployment would map names with
 an explicit alias table at the collector plug-in point.
+
+## Data quality — `src/data/quality.ts`
+
+`qualityReport(records)` checks day coverage per source over the dataset's
+range: `days_expected`, `days_with_data`, `coverage_pct`, `gaps` (runs of days
+with no record, which is different from a $0 day), and `zero_cost_records`.
+`npm run collect` prints the warnings and writes a compact `quality` block
+(`coverage_pct`, `gap_days`, `warnings`) into `manifest.json`. In the sample,
+Cursor has four weekend days with no usage; every other source is complete.
+
+## Insights — `src/insights.ts`
+
+`buildInsights(records, asOf)` calls every engine once and returns an
+"at a glance" object: total spend, budget statuses + summary + worst, next
+week's forecast, the weekly trend (USD/week), up to three recent source-level
+anomalies, cross-source assistants, and plain-English `headlines`. Records
+after `asOf` are ignored.
