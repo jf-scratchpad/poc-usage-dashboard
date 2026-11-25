@@ -6,10 +6,11 @@ A static web dashboard of AI usage and spend **per assistant** and **per week**,
 
 ## What you get
 
-- **Spend by week**: a weekly trend line (ISO weeks, Monday start), per source.
+- **Spend by week**: a weekly trend line (ISO weeks, Monday start), per source plus a total.
 - **Spend by assistant**: total cost per assistant or project.
-- **Top consumers**: the highest-cost assistants/projects.
+- **Top consumers**: the highest-cost assistants/projects, with cost and units.
 - **Source filter**: show Grok Bot, Cursor, Azure, or any mix.
+- **Empty state**: until collectors are wired into `loadAllUsage()`, the page still renders and explains that no records have loaded.
 
 ## Quick start
 
@@ -40,7 +41,7 @@ CI (`.github/workflows/ci.yml`) runs `npm ci`, typecheck, the limits check, test
 ## Data flow
 
 ```
-data/sample/<source>.*   ->  src/adapters/<source>.ts  ->  validateRecords()  ->  loadAllUsage()  ->  src/app (aggregate + charts)
+data/sample/<source>.*   ->  src/adapters/<source>.ts  ->  validateRecords()  ->  loadAllUsage()  ->  src/aggregate.ts + src/app (charts)
  (raw, source-shaped)        (parse + map to schema)       (src/schema/usage.ts)  (src/adapters/index.ts)   (Chart.js, static)
 ```
 
