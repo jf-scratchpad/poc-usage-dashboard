@@ -53,8 +53,8 @@ CI (`.github/workflows/ci.yml`) runs `npm ci`, typecheck, the limits check, `col
 ## Data flow
 
 ```
-data/sample/<source>-*.*  ->  src/adapters/<source>.ts  ->  validateRecords()  ->  loadAllUsage()  ->  src/aggregate.ts + src/app (charts)
- (raw, source-shaped)        (parse + map to schema)       (src/schema/usage.ts)  (src/adapters/index.ts)   (Chart.js, static)
+data/sample/<source>-*.*  ->  src/adapters/<source>.ts  ->  npm run collect             ->  public/data/usage.v1.json  ->  loadUsageData()  ->  engines + src/ui
+ (raw, source-shaped)        (parse + map to schema)       (validate, dedupe, manifest)    (+ manifest.json)              (src/data/load.ts)   (budgets, forecast, ...)
 ```
 
 Every adapter turns its source's raw format into the common `UsageRecord`:

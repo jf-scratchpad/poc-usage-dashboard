@@ -1,40 +1,48 @@
 # Architecture
 
-A build-time static site. There is no backend and no runtime network call: sample data is bundled into the JavaScript at build time by Vite.
+A build-time static site with no backend. `npm run collect` turns the fictional sample exports into a versioned JSON dataset in `public/data/`; the site loads that same-origin file (falling back to the adapters bundled in a lazy chunk) and runs pure engines in the browser. Nothing contacts a third-party host, account, or API.
 
 ```mermaid
 flowchart LR
-  subgraph data["data/sample/ (fake)"]
+  subgraph samples["data/sample/ (fictional)"]
     G[grok-bot-usage.json]
     C[cursor-usage.csv]
     A[azure-cost-management.csv]
+    L[llm-api-usage.csv]
   end
   subgraph adapters["src/adapters/"]
-    GA[grok-bot.ts]
-    CA[cursor.ts]
-    AA[azure.ts]
-    IDX["index.ts<br/>loadAllUsage()"]
+    AD["grok-bot · cursor · azure · llm-api<br/>parse + map + validateRecord()"]
+    REG["registry.ts (adapters)<br/>sources.ts (labels, units, colors)"]
   end
-  S["src/schema/usage.ts<br/>UsageRecord + validateRecords()"]
-  subgraph app["src/app/ + index.html"]
-    AGG[aggregation<br/>week / assistant / top N / filter]
-    CH[Chart.js views]
+  PIPE["src/data/pipeline.ts + quality.ts<br/>validate all rows · dedupe · sort · coverage"]
+  OUT[("public/data/<br/>usage.v1.json + manifest.json")]
+  LOAD["src/data/load.ts<br/>loadUsageData()"]
+  subgraph engines["pure engines (src/)"]
+    AGG[aggregate]
+    BUD["budgets<br/>+ config/budgets.json"]
+    FC[forecast]
+    AN[anomaly]
+    AL[allocation]
+    INS[insights]
   end
-  G --> GA
-  C --> CA
-  A --> AA
-  GA & CA & AA --> S
-  S --> IDX --> AGG --> CH
-  CH --> DIST[(dist/ static files)]
+  UI["src/ui/ views<br/>overview · assistant · source · budgets · forecast · anomalies"]
+  G & C & A & L --> AD --> REG
+  REG -- "npm run collect (build time)" --> PIPE --> OUT
+  OUT -- "fetch ./data/* (same origin)" --> LOAD
+  REG -. "fallback: dynamic import" .-> LOAD
+  LOAD --> engines --> UI
+  UI --> DIST[(dist/ static files → GitHub Pages)]
 ```
 
 ## Pieces
 
-- **Schema** (`src/schema/usage.ts`): the one contract. `UsageRecord { date, source, assistant_or_project, units, unit_type, cost_usd }`, `validateRecord(s)` with clear errors, and the `UsageAdapter` interface (async `load()`).
-- **Adapters** (`src/adapters/<source>.ts`): one per source. Each parses its raw, source-shaped sample (`data/sample/`, named after each source's native export), maps to `UsageRecord`, and validates. The `REAL DATA PLUGS IN HERE` comment marks where a live export would replace the sample read.
-- **Registry** (`src/adapters/index.ts`): `loadAllUsage()` runs every adapter and concatenates results. It's the only thing the app imports from the data layer.
-- **Aggregation** (`src/aggregate.ts`): pure functions over `UsageRecord[]`: spend by ISO week (Monday start, computed from the calendar date), spend by assistant, top consumers, week-over-week, and filtering by source. Pure so it's unit-testable without a browser. Other tracks should import this module rather than reimplementing it.
-- **Views** (`index.html`, `src/app/`): Chart.js charts for spend by week (trend lines), spend by assistant, top consumers, plus the source filter controls.
+- **Schema** (`src/schema/usage.ts`): the one contract. `UsageRecord { date, source, assistant_or_project, units, unit_type, cost_usd }`, `validateRecord(s)` with clear errors, and the `UsageAdapter` interface (async `load()`). `SOURCES` lists the four sources.
+- **Adapters** (`src/adapters/<source>.ts`): one per source. Each parses its raw, source-shaped sample (`data/sample/`), maps to `UsageRecord`, and validates. The `REAL DATA PLUGS IN HERE` comment marks where a live export would replace the sample read.
+- **Registry** (`src/adapters/registry.ts`, metadata in `sources.ts`): registered adapters plus each source's display name, unit type, and color. `loadAllUsage()` (`src/adapters/index.ts`) runs every registered adapter. See [adapters.md](adapters.md), "Adding a source".
+- **Collect + load** (`scripts/collect.mjs`, `src/data/`): see "v2 data platform" below.
+- **Aggregation** (`src/aggregate.ts`): pure functions over `UsageRecord[]`: spend by ISO week (Monday start), spend by assistant, top consumers, week-over-week, and filtering by source.
+- **Engines** (`src/budgets.ts`, `forecast.ts`, `anomaly.ts`, `allocation.ts`, `insights.ts`): pure and unit-tested; the math is in [analytics.md](analytics.md).
+- **Views** (`index.html`, `src/ui/`): hash-routed v2 UI (overview, assistant drill-down, source detail, budgets, forecast, anomalies) with Chart.js; `src/app/format.ts` and `dates.ts` remain as shared helpers.
 - **Build**: `vite build` produces `dist/` with relative asset paths (`base: './'`) so it can be served from any folder. The Pages workflow overrides this with `VITE_BASE=/usage-dashboard-trial/` and publishes `dist/` to GitHub Pages (Jose's approved v2 exception). No other deploy or custom domain.
 
 ## Quality gates
@@ -45,26 +53,7 @@ flowchart LR
 
 ## v2 data platform (track A)
 
-```mermaid
-flowchart LR
-  subgraph samples["data/sample/ (fictional)"]
-    G[grok-bot] 
-    C[cursor]
-    A[azure]
-    L[llm-api]
-  end
-  REG["src/adapters/registry.ts<br/>adapters + sources.ts metadata"]
-  PIPE["src/data/pipeline.ts<br/>validate all rows · dedupe · sort"]
-  OUT[("public/data/<br/>usage.v1.json + manifest.json")]
-  LOAD["src/data/load.ts<br/>loadUsageData()"]
-  ENG["pure engines<br/>aggregate · budgets · forecast · anomaly · allocation"]
-  UI[UI views]
-  G & C & A & L --> REG
-  REG -- "npm run collect (build time)" --> PIPE --> OUT
-  OUT -- "fetch ./data/* (same origin)" --> LOAD
-  REG -. "fallback: dynamic import, bundled" .-> LOAD
-  LOAD --> ENG --> UI
-```
+The diagram at the top shows the whole flow. Details:
 
 - **Registry** (`src/adapters/registry.ts`, metadata in `sources.ts`): every source's display name, unit type, color, and adapter. See docs/adapters.md, "Adding a source".
 - **Collect** (`npm run collect` → `scripts/collect.mjs` → `scripts/collect-run.ts`): runs every registered adapter through `normalizeBatches()`, which validates every row (all errors reported at once, with source, index, and a row snippet), drops exact duplicates on the natural key day × source × assistant × unit type, and fails on conflicting duplicates. Writes a versioned dataset and a manifest (counts, date range, per-source totals, schema version). `generated_at` is derived from the last data day, so output is byte-identical across runs; a test fails if the committed files are stale.
