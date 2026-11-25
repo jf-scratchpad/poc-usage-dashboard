@@ -72,6 +72,7 @@ Every notable choice and why. Newest additions go at the bottom of their section
 - **Budgets: straight-line run-rate projection, inclusive 80%/100% thresholds, assistant budgets matched case-insensitively across sources.** Simple and explainable; cross-source matching is what makes "Cody's total spend" possible. Config is JSON in `config/` so it's editable without code.
 - **Forecast: hand-written OLS + simple exponential smoothing, no stats library.** Both are a few lines, explainable in docs/analytics.md, and exactly testable against hand-computed series; a dependency would add weight without accuracy on 12 points.
 - **Anomalies: rolling z-score over the prior N weeks (current week excluded) with a σ floor and a minimum dollar delta.** Excluding the current week keeps a spike from inflating its own baseline; the floors stop near-constant or tiny series from flagging cents. Spikes only, since overspend is what matters for cost.
+- **Allocation merges assistant/project names case-insensitively across sources; unit economics never mixes unit types.** Gives the per-assistant cross-source view with no alias config for fictional data; mixing requests/tokens/USD would make cost per unit meaningless.
 
 ## v2 GitHub Pages (track C)
 
@@ -101,3 +102,5 @@ Every notable choice and why. Newest additions go at the bottom of their section
 - **Theme is `html[data-theme]`, toggled by a button and saved in `localStorage` (`ud-theme`); first visit follows the OS preference.** Charts re-render on toggle so axis and grid colors match.
 - **v1 `src/app/render.ts` / `charts.ts` stay in the tree (still tested) until v2 covers every view; `index.html` now boots `src/ui/main.ts`.**
 - **`tests/ui/bundle-boundaries.test.ts` fails if the UI entry point statically reaches Chart.js, an adapter (other than `sources.ts` metadata), sample data, or a view module.** Keeps the initial chunk small as tracks add modules.
+- **Drill-down pages pin their subject and bypass the one filter that could hide it.** `#/assistant/<name>` ignores the assistant search (dates and sources still apply); `#/source/<id>` ignores the source filter and shows a note when that source is unchecked. Otherwise a shared link could open on an empty page.
+- **Assistant names match case-insensitively across sources** (same rule as track A's allocation), so "Cody" in Grok Bot and "cody" in LLM API are one assistant with one rank. Units are never added across unit types; cost per unit is shown per source and unit type.

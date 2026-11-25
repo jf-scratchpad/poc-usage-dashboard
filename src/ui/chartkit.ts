@@ -68,6 +68,8 @@ export type BarSpec = {
   stacked?: boolean;
   money?: boolean;
   onClickLabel?: (label: string, index: number) => void;
+  /** Optional dashed line overlay (e.g. a trend of the stacked total). */
+  trend?: { label: string; data: (number | null)[]; color: string };
 };
 
 function reducedMotion(): boolean {
@@ -170,7 +172,7 @@ export function barChart(canvas: HTMLCanvasElement, spec: BarSpec, theme: Theme)
       if (first) cb(spec.labels[first.index] ?? '', first.index);
     };
   }
-  return new Chart<'bar'>(canvas, {
+  const chart = new Chart<'bar'>(canvas, {
     type: 'bar',
     data: {
       labels: spec.labels,
@@ -182,8 +184,25 @@ export function barChart(canvas: HTMLCanvasElement, spec: BarSpec, theme: Theme)
         borderWidth: 1,
         borderRadius: 4,
         stack: spec.stacked ? 'stack' : undefined,
+        order: 1,
       })),
     },
     options,
   });
+  if (spec.trend) {
+    chart.data.datasets.push({
+      type: 'line',
+      label: spec.trend.label,
+      data: spec.trend.data,
+      borderColor: spec.trend.color,
+      backgroundColor: spec.trend.color,
+      borderDash: [6, 4],
+      borderWidth: 1.5,
+      pointRadius: 0,
+      fill: false,
+      order: 0,
+    } as never);
+    chart.update('none');
+  }
+  return chart;
 }
