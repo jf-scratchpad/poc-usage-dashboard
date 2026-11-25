@@ -1,0 +1,54 @@
+name: Deploy to GitHub Pages
+
+# Publishes dist/ to https://jf-scratchpad.github.io/usage-dashboard-trial/
+# Enablement (Settings → Pages → Source: GitHub Actions, or POST /pages
+# with build_type: workflow) must be done once out of band: creating a
+# Pages site also requires administration:write, which this app does not have.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write # required by actions/upload-pages-artifact
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Build with the GitHub Pages base path
+        run: npm run build
+        env:
+          VITE_BASE: /usage-dashboard-trial/
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

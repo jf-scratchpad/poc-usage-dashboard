@@ -1,9 +1,12 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vite';
 
-// Static build only: `npm run build` writes plain files to dist/. Nothing is deployed.
+// Local and CI builds keep relative asset paths. The Pages workflow sets
+// VITE_BASE=/usage-dashboard-trial/ so assets resolve on the project site.
+const base = process.env.VITE_BASE || './';
+
 export default defineConfig({
-  base: './',
+  base,
   build: {
     outDir: 'dist',
     emptyOutDir: true,
